@@ -16,9 +16,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
 	
-	Button button1,button2,button3;
+	Button button1, button2, button3;
+	EditText login, password;
+	int loginId, passwordId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		button1.setOnClickListener(this);
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
+		
+//		loginId = View.generateViewId();
+		login.setId(loginId);
+//		passwordId = View.generateViewId();
+		password.setId(passwordId);
 	}
 
 	@Override
@@ -67,8 +74,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 				break;
 			case R.id.button3:
 				RelativeLayout rl = (RelativeLayout) findViewById(R.id.layout1);
-				EditText login = new EditText(this);
-				EditText password = new EditText(this);
+				login = new EditText(this);
+				password = new EditText(this);
 				login.setGravity(Gravity.CENTER);
 				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(button3.getLayoutParams());
 				params.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -92,5 +99,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
 				break;
 		}
 		
+	}
+
+	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		
+		if (hasFocus) {
+			if (v.getId() == loginId) {
+				
+			}
+			else if (v.getId() == passwordId) {
+				
+			}
+		}
 	}
 }
