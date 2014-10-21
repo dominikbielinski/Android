@@ -11,5 +11,6 @@
     <string name="login">Login</string>
     <string name="newAlert">Nowe zgłoszenie</string>
     <string name="email">E-mail</string>
+    <string name="doRegister">Zarejestruj!</string>
 
 </resources>

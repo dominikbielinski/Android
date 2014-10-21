@@ -21,7 +21,7 @@ import android.widget.ScrollView;
 
 public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
 	
-	Button button1, button2, button3, loginCommand;
+	Button button1, button2, button3, registerCommand;
 	EditText login, password, email;
 	ScrollView sv;
 
@@ -65,6 +65,11 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 	@Override
 	public void onClick(View v) {
+		
+		if (v == registerCommand) {
+			new Register(login.getText().toString(), password.getText().toString(), email.getText().toString());
+		}
+		
 		switch(v.getId()) {
 			case R.id.button1:
 				
@@ -73,7 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				login = new EditText(this);
 				password = new EditText(this);
 				email = new EditText(this);
-				loginCommand = new Button(this);
+				registerCommand = new Button(this);
 				login.setGravity(Gravity.CENTER);
 				password.setGravity(Gravity.CENTER);
 				email.setGravity(Gravity.CENTER);
@@ -92,24 +97,28 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				int pixels = (int) (240 * scale + 0.5f);
 				int buttonPixels = (int) (200 * scale + 0.5f);
 				
-				button3.setVisibility(View.GONE);
-				
+//				button1.setVisibility(View.GONE);
+				rl.invalidate();
 				params.width=pixels;
 				
 				LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				rl.setClipChildren(true);
-				
+
 				login.setLayoutParams(params);
 				password.setLayoutParams(params);
 				email.setLayoutParams(params);
 				email.setMaxWidth((int) (240 * scale + 0.5f));
 				
 				buttonParams.width=buttonPixels;
-				loginCommand.setLayoutParams(buttonParams);
+				registerCommand.setLayoutParams(buttonParams);
+				registerCommand.setText(R.string.doRegister);
+				registerCommand.setOnClickListener(this);
+				
 				rl.addView(login, 1);
 				rl.addView(password, 2);
 				rl.addView(email, 3);
-				rl.addView(loginCommand, 4);
+				rl.addView(registerCommand, 4);
+				
+				rl.invalidate();
 				
 				break;
 			case R.id.button2:
