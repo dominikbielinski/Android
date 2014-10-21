@@ -39,11 +39,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		button1.setOnClickListener(this);
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
-		
-//		loginId = View.generateViewId();
-		login.setId(loginId);
-//		passwordId = View.generateViewId();
-		password.setId(passwordId);
 	}
 
 	@Override
@@ -105,10 +100,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	public void onFocusChange(View v, boolean hasFocus) {
 		
 		if (hasFocus) {
-			if (v.getId() == loginId) {
+			if (v == login) {
 				
 			}
-			else if (v.getId() == passwordId) {
+			else if (v == password) {
 				
 			}
 		}
