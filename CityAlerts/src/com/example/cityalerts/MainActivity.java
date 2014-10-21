@@ -14,13 +14,16 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 
 public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
 	
-	Button button1, button2, button3;
-	EditText login, password;
-	int loginId, passwordId;
+	Button button1, button2, button3, loginCommand;
+	EditText login, password, email;
+	ScrollView sv;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,33 +67,54 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	public void onClick(View v) {
 		switch(v.getId()) {
 			case R.id.button1:
+				
+				LinearLayout rl = (LinearLayout) findViewById(R.id.layout1);
+				
+				login = new EditText(this);
+				password = new EditText(this);
+				email = new EditText(this);
+				loginCommand = new Button(this);
+				login.setGravity(Gravity.CENTER);
+				password.setGravity(Gravity.CENTER);
+				email.setGravity(Gravity.CENTER);
+				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+				login.setHint(R.string.username);
+				login.setOnFocusChangeListener(this);
+				password.setOnFocusChangeListener(this);
+				password.setHint(R.string.password);
+				email.setHint(R.string.email);
+				email.setOnFocusChangeListener(this);
+				
+				
+				final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+				
+				int pixels = (int) (240 * scale + 0.5f);
+				int buttonPixels = (int) (200 * scale + 0.5f);
+				
+				button3.setVisibility(View.GONE);
+				
+				params.width=pixels;
+				
+				LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				rl.setClipChildren(true);
+				
+				login.setLayoutParams(params);
+				password.setLayoutParams(params);
+				email.setLayoutParams(params);
+				email.setMaxWidth((int) (240 * scale + 0.5f));
+				
+				buttonParams.width=buttonPixels;
+				loginCommand.setLayoutParams(buttonParams);
+				rl.addView(login, 1);
+				rl.addView(password, 2);
+				rl.addView(email, 3);
+				rl.addView(loginCommand, 4);
+				
 				break;
 			case R.id.button2:
 				break;
 			case R.id.button3:
-				RelativeLayout rl = (RelativeLayout) findViewById(R.id.layout1);
-				login = new EditText(this);
-				password = new EditText(this);
-				login.setGravity(Gravity.CENTER);
-				RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(button3.getLayoutParams());
-				params.addRule(RelativeLayout.CENTER_HORIZONTAL);
-				params.addRule(Gravity.CENTER);
-				params.leftMargin=(int) button3.getX();
-				params.topMargin=(int) button3.getY();
-				login.setHint("U¿ytkownik");
-				login.setOnFocusChangeListener(new OnFocusChangeListener() {
-					
-					@Override
-					public void onFocusChange(View v, boolean hasFocus) {
-						if (hasFocus) {
-							((EditText)v).setHint("");
-						}	
-					}
-				});
-				
-				button3.setVisibility(View.GONE);
-				login.setLayoutParams(params);
-				rl.addView(login);
 				break;
 		}
 		
@@ -101,11 +125,12 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		
 		if (hasFocus) {
 			if (v == login) {
-				
+				login.setHint("");
 			}
 			else if (v == password) {
-				
+				password.setHint("");
 			}
+			
 		}
 	}
 }
