@@ -3,6 +3,8 @@ package com.example.cityalerts;
 import android.app.Activity;
 import android.opengl.Visibility;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.Gravity;
@@ -18,8 +20,9 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
+public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener, TextWatcher {
 	
 	Button button1, button2, button3, registerCommand;
 	EditText login, password, email;
@@ -91,6 +94,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				email.setHint(R.string.email);
 				email.setOnFocusChangeListener(this);
 				
+				login.addTextChangedListener(this);
 				
 				final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
 				
@@ -141,5 +145,22 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			}
 			
 		}
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		Toast.makeText(getApplicationContext(), count+"", Toast.LENGTH_SHORT).show();
 	}
 }
