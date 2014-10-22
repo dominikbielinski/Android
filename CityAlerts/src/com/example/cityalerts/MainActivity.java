@@ -150,7 +150,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
-		// ASDSADASDAS
+		// ASDSADASDASsad
 		
 	}
 
