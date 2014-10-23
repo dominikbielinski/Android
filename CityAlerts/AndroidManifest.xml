@@ -3,6 +3,8 @@
     package="com.example.cityalerts"
     android:versionCode="1"
     android:versionName="1.0" >
+    
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -25,6 +27,10 @@
         <activity
             android:name=".SendAlert"
             android:label="@string/title_activity_send_alert" >
+        </activity>
+        <activity
+            android:name=".Alert"
+            android:label="@string/title_activity_alert" >
         </activity>
     </application>
 

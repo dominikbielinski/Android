@@ -1,7 +1,9 @@
 package com.example.cityalerts;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -22,6 +24,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	Button button1, button2, button3, registerCommand;
 	EditText login, password, email;
 	ScrollView sv;
+	Register register;
+	LinearLayout rl;
+	Button loginCommand;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +45,16 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		button1.setOnClickListener(this);
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
+		
+		rl = (LinearLayout) findViewById(R.id.layout1);
+		
+		register = new Register();
+		
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+
+		StrictMode.setThreadPolicy(policy); 
+
+	
 	}
 
 	@Override
@@ -65,18 +80,20 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	public void onClick(View v) {
 		
 		if (v == registerCommand) {
-			new Register(login.getText().toString(), password.getText().toString(), email.getText().toString());
-		}
+//			new Register(login.getText().toString(), password.getText().toString(), email.getText().toString());
+			DbConnection instance = DbConnection.getInstance();
+			System.out.println("hahaha");
+		}	
 		
 		switch(v.getId()) {
 			case R.id.button1:
-				
-				LinearLayout rl = (LinearLayout) findViewById(R.id.layout1);
+				if (login == null) {
 				
 				login = new EditText(this);
 				password = new EditText(this);
 				email = new EditText(this);
 				registerCommand = new Button(this);
+				
 				login.setGravity(Gravity.CENTER);
 				password.setGravity(Gravity.CENTER);
 				email.setGravity(Gravity.CENTER);
@@ -118,11 +135,60 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				rl.addView(registerCommand, 4);
 				
 				rl.invalidate();
+				}
+				else {
+					rl.removeView(email);
+					rl.removeView(login);
+					rl.removeView(password);
+					rl.removeView(registerCommand);
+					email = null;
+					login = null;
+					password = null;
+					registerCommand = null;
+				}
 				
 				break;
 			case R.id.button2:
+				if (email == null) {
+					email = new EditText(this);
+					password = new EditText(this);
+					loginCommand = new Button(this);
+					
+					password.setOnFocusChangeListener(this);
+					password.setHint(R.string.password);
+					email.setHint(R.string.email);
+					email.setOnFocusChangeListener(this);
+					
+					rl = (LinearLayout) findViewById(R.id.layout1);
+					
+					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+					
+					final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+					
+					int pixels = (int) (240 * scale + 0.5f);
+					int buttonPixels = (int) (200 * scale + 0.5f);
+					
+					password.setLayoutParams(params);
+					email.setLayoutParams(params);
+					email.setMaxWidth((int) (240 * scale + 0.5f));
+					
+					rl.addView(email);
+					rl.addView(password);
+					rl.addView(loginCommand);
+					
+				}
+				else {
+					email = null;
+					password = null;
+					loginCommand = null;
+					
+					rl.removeView(email);
+					rl.removeView(password);
+					rl.removeView(loginCommand);
+				}
 				break;
 			case R.id.button3:
+				startActivity(new Intent(MainActivity.this, Alert.class));
 				break;
 		}
 		
@@ -157,5 +223,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 		Toast.makeText(getApplicationContext(), count+"", Toast.LENGTH_SHORT).show();
+		register.checkIfFree(s.toString());
 	}
 }
