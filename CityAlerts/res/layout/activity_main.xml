@@ -16,6 +16,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:drawableRight="@drawable/ic_launcher"
         android:text="@string/register" />
 
     <Button
@@ -23,6 +24,7 @@
         android:layout_width="240dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:drawableRight="@drawable/ic_launcher"
         android:text="@string/login" />
 
     <Button

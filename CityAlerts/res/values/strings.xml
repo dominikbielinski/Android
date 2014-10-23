@@ -12,5 +12,6 @@
     <string name="newAlert">Nowe zgłoszenie</string>
     <string name="email">E-mail</string>
     <string name="doRegister">Zarejestruj!</string>
+    <string name="title_activity_alert">Alert</string>
 
 </resources>
