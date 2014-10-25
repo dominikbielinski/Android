@@ -22,7 +22,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener, TextWatcher {
+public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
 	
 	Button button1, button2, button3, registerCommand;
 	EditText login, password, email;
@@ -31,8 +31,8 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	LinearLayout ll , llmain;
 	Button loginCommand;
 	View login2;
-	Drawable drawable,drawable2;
-	ScaleDrawable sd,sd2;
+	Drawable drawable,drawable2,drawable3,drawable4;
+	ScaleDrawable sd,sd2,sd3,sd4;
 	
 	
 	private boolean LOGIN_NOT_VISIBLE = true;
@@ -56,7 +56,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
 		
-		login2 = (View) findViewById(R.id.login2);
 		login = (EditText) findViewById(R.id.login);
 		password = (EditText) findViewById(R.id.password);
 		email = (EditText) findViewById(R.id.email);
@@ -66,10 +65,9 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		email.setOnFocusChangeListener(this);
 		password.setOnFocusChangeListener(this);
 		registerCommand.setOnClickListener(this);
-		login.addTextChangedListener(this);
 		
-		ll = (LinearLayout) findViewById(R.id.layout2);
-		llmain = (LinearLayout) findViewById(R.id.layout1);
+		login.addTextChangedListener(new MultiTextWatcher(login));
+		email.addTextChangedListener(new MultiTextWatcher(email));
 		
 		register = new Register(this);
 		
@@ -84,12 +82,22 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		
 		sd2 = new ScaleDrawable(drawable2, 0,0,0);
 		
+		
+		drawable3 = getResources().getDrawable(R.drawable.green_ok);
+		drawable3.setBounds(0, 0, (int)(drawable3.getIntrinsicWidth()*0.04), 
+		                         (int)(drawable3.getIntrinsicHeight()*0.04));
+		sd3 = new ScaleDrawable(drawable3, 0, 0, 0);
+		
+		drawable4 = getResources().getDrawable(R.drawable.red_not_ok);
+		drawable4.setBounds(0, 0, (int)(drawable4.getIntrinsicWidth()*0.04), 
+		                         (int)(drawable4.getIntrinsicHeight()*0.04));
+		sd4 = new ScaleDrawable(drawable4, 0, 0, 0);
+		
 		button1.setCompoundDrawables(null, null, sd.getDrawable(), null); 
 		
-		
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-
-		StrictMode.setThreadPolicy(policy); 
+//		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//
+//		StrictMode.setThreadPolicy(policy); 
 
 	
 	}
@@ -126,9 +134,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			case R.id.button1:
 				if (REGISTER_NOT_VISIBLE) {
 					
-					
-					
-					ll.setVisibility(View.VISIBLE);
+					login.setVisibility(View.VISIBLE);
 					password.setVisibility(View.VISIBLE);
 					email.setVisibility(View.VISIBLE);
 					registerCommand.setVisibility(View.VISIBLE);
@@ -136,20 +142,15 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 					button1.setCompoundDrawables(null, null, sd2.getDrawable(), null); 
 					
 					REGISTER_NOT_VISIBLE = false;
-					
-					llmain.invalidate();
-				
 				}
 				else {
-					
-					ll.setVisibility(View.GONE);
-//					login.setVisibility(View.GONE);
+				
+					login.setVisibility(View.GONE);
 					password.setVisibility(View.GONE);
 					email.setVisibility(View.GONE);
 					registerCommand.setVisibility(View.GONE);
 					button1.setCompoundDrawables(null, null, sd.getDrawable(), null); 
-					REGISTER_NOT_VISIBLE   = true;
-					
+					REGISTER_NOT_VISIBLE   = true;	
 				}
 				
 				break;
@@ -161,13 +162,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 					email.setVisibility(View.VISIBLE);
 					registerCommand.setVisibility(View.VISIBLE);
 					
-					login.setOnFocusChangeListener(this);
-					password.setOnFocusChangeListener(this);
-					email.setOnFocusChangeListener(this);
-					registerCommand.setOnClickListener(this);
-					
 					LOGIN_NOT_VISIBLE = false;
-				
 				}
 				else {
 					
@@ -182,6 +177,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			case R.id.button3:
 				startActivity(new Intent(MainActivity.this, Alert.class));
 				break;
+			case R.id.registerCommand:
+				register.tryToRegister(login.getText().toString(),
+										email.getText().toString(),
+										password.getText().toString());
 		}
 		
 	}
@@ -203,37 +202,61 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		else {
 			if (v == login && ((EditText)v).getText().toString().equals("")) {
 				login.setHint(R.string.username);
+				login.setCompoundDrawables(null, null, null, null);
 			}
 			else if (v == password && ((EditText)v).getText().toString().equals("")) {
 				password.setHint(R.string.password);
 			}
 			else if (v == email && ((EditText)v).getText().toString().equals("")) {
 				email.setHint(R.string.email);
+				email.setCompoundDrawables(null, null, null, null);
 			}	
 		}
 	}
 
-	@Override
-	public void afterTextChanged(Editable s) {
-		
-	}
-
-	@Override
-	public void beforeTextChanged(CharSequence s, int start, int count,
-			int after) {
-
-	}
-
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		Toast.makeText(getApplicationContext(), count+"", Toast.LENGTH_SHORT).show();
-		register.checkIfFree(s.toString());
-	}
-
-	public void updateCheckStatus(Boolean[] bool) {
-		if (bool[0] == true) {
-			login2.setBackgroundResource(R.drawable.green_ok);
+	public void updateCheckStatus(String...params) {
+		if (params[1].equals("login")) {
+			if (params[0].equals("true")) {
+				login.setCompoundDrawables(null, null, sd3.getDrawable(), null);
+			}
+			else login.setCompoundDrawables(null, null, sd4.getDrawable(), null);
 		}
-		else login2.setBackgroundResource(R.drawable.red_not_ok);
+		else {
+			if (params[0].equals("true")) {
+				email.setCompoundDrawables(null, null, sd3.getDrawable(), null);
+			}
+			else email.setCompoundDrawables(null, null, sd4.getDrawable(), null);
+		}
+	}
+	
+	private class MultiTextWatcher implements TextWatcher{
+
+	    private View view;
+	    private MultiTextWatcher(View view) {
+	        this.view = view;
+	    }
+
+	    public void afterTextChanged(Editable editable) {
+	    	
+	    }
+
+		@Override
+		public void beforeTextChanged(CharSequence s, int start, int count,
+				int after) {
+		}
+
+		@Override
+		public void onTextChanged(CharSequence s, int start, int before,
+				int count) {
+			switch(view.getId()) {
+			case R.id.login:
+				register.checkIfFree(s.toString() , "login");
+				break;
+			case R.id.email:
+				register.checkIfFree(s.toString() , "email");
+				break;
+			}
+			
+		}
 	}
 }

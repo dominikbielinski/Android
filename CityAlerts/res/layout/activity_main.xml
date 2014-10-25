@@ -19,30 +19,13 @@
         android:drawableRight="@drawable/blue_arrow_down"
         android:text="@string/register" />
     
-    <LinearLayout 
-	    android:id="@+id/layout2"
-	    android:layout_width="wrap_content"
+	<EditText
+	    android:id="@+id/login"
+	    android:layout_width="240dp"
 	    android:layout_height="wrap_content"
-	    android:orientation="horizontal"
 	    android:visibility="gone"
-	    android:gravity="center"
-	    >
-	    <EditText
-	        android:id="@+id/login"
-	        android:layout_width="240dp"
-			android:layout_height="wrap_content"
-			android:gravity="center_horizontal"
-			android:hint="@string/login"
-			/>
-	    <View
-	        android:id="@+id/login2"
-	        android:layout_width="20dp"
-			android:layout_height="20dp"
-			android:gravity="center_horizontal"
-			android:hint="@string/login"
-	        />
-	    
-	</LinearLayout>
+	    android:gravity="center_horizontal"
+	    android:hint="@string/login" />
     
     <EditText
         android:id="@+id/email"
