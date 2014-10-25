@@ -2,6 +2,9 @@ package com.example.cityalerts;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ScaleDrawable;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.Editable;
@@ -25,8 +28,15 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 	EditText login, password, email;
 	ScrollView sv;
 	Register register;
-	LinearLayout rl;
+	LinearLayout ll , llmain;
 	Button loginCommand;
+	View login2;
+	Drawable drawable,drawable2;
+	ScaleDrawable sd,sd2;
+	
+	
+	private boolean LOGIN_NOT_VISIBLE = true;
+	private boolean REGISTER_NOT_VISIBLE = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +56,36 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
 		
-		rl = (LinearLayout) findViewById(R.id.layout1);
+		login2 = (View) findViewById(R.id.login2);
+		login = (EditText) findViewById(R.id.login);
+		password = (EditText) findViewById(R.id.password);
+		email = (EditText) findViewById(R.id.email);
+		registerCommand = (Button) findViewById(R.id.registerCommand);
+
+		login.setOnFocusChangeListener(this);
+		email.setOnFocusChangeListener(this);
+		password.setOnFocusChangeListener(this);
+		registerCommand.setOnClickListener(this);
+		login.addTextChangedListener(this);
 		
-		register = new Register();
+		ll = (LinearLayout) findViewById(R.id.layout2);
+		llmain = (LinearLayout) findViewById(R.id.layout1);
+		
+		register = new Register(this);
+		
+		drawable = getResources().getDrawable(R.drawable.blue_arrow_down);
+		drawable.setBounds(0, 0, (int)(drawable.getIntrinsicWidth()*0.1), 
+		                         (int)(drawable.getIntrinsicHeight()*0.1));
+		sd = new ScaleDrawable(drawable, 0, 0, 0);
+		
+		drawable2 = getResources().getDrawable(R.drawable.blue_arrow_up);
+		drawable2.setBounds(0, 0, (int)(drawable.getIntrinsicWidth()*0.1), 
+		                         (int)(drawable.getIntrinsicHeight()*0.1));
+		
+		sd2 = new ScaleDrawable(drawable2, 0,0,0);
+		
+		button1.setCompoundDrawables(null, null, sd.getDrawable(), null); 
+		
 		
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 
@@ -87,104 +124,59 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		
 		switch(v.getId()) {
 			case R.id.button1:
-				if (login == null) {
+				if (REGISTER_NOT_VISIBLE) {
+					
+					
+					
+					ll.setVisibility(View.VISIBLE);
+					password.setVisibility(View.VISIBLE);
+					email.setVisibility(View.VISIBLE);
+					registerCommand.setVisibility(View.VISIBLE);
+					
+					button1.setCompoundDrawables(null, null, sd2.getDrawable(), null); 
+					
+					REGISTER_NOT_VISIBLE = false;
+					
+					llmain.invalidate();
 				
-				login = new EditText(this);
-				password = new EditText(this);
-				email = new EditText(this);
-				registerCommand = new Button(this);
-				
-				login.setGravity(Gravity.CENTER);
-				password.setGravity(Gravity.CENTER);
-				email.setGravity(Gravity.CENTER);
-				LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-
-				login.setHint(R.string.username);
-				login.setOnFocusChangeListener(this);
-				password.setOnFocusChangeListener(this);
-				password.setHint(R.string.password);
-				email.setHint(R.string.email);
-				email.setOnFocusChangeListener(this);
-				
-				login.addTextChangedListener(this);
-				
-				final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-				
-				int pixels = (int) (240 * scale + 0.5f);
-				int buttonPixels = (int) (200 * scale + 0.5f);
-				
-//				button1.setVisibility(View.GONE);
-				rl.invalidate();
-				params.width=pixels;
-				
-				LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-
-				login.setLayoutParams(params);
-				password.setLayoutParams(params);
-				email.setLayoutParams(params);
-				email.setMaxWidth((int) (240 * scale + 0.5f));
-				
-				buttonParams.width=buttonPixels;
-				registerCommand.setLayoutParams(buttonParams);
-				registerCommand.setText(R.string.doRegister);
-				registerCommand.setOnClickListener(this);
-				
-				rl.addView(login, 1);
-				rl.addView(password, 2);
-				rl.addView(email, 3);
-				rl.addView(registerCommand, 4);
-				
-				rl.invalidate();
 				}
 				else {
-					rl.removeView(email);
-					rl.removeView(login);
-					rl.removeView(password);
-					rl.removeView(registerCommand);
-					email = null;
-					login = null;
-					password = null;
-					registerCommand = null;
+					
+					ll.setVisibility(View.GONE);
+//					login.setVisibility(View.GONE);
+					password.setVisibility(View.GONE);
+					email.setVisibility(View.GONE);
+					registerCommand.setVisibility(View.GONE);
+					button1.setCompoundDrawables(null, null, sd.getDrawable(), null); 
+					REGISTER_NOT_VISIBLE   = true;
+					
 				}
 				
 				break;
 			case R.id.button2:
-				if (email == null) {
-					email = new EditText(this);
-					password = new EditText(this);
-					loginCommand = new Button(this);
+				if (LOGIN_NOT_VISIBLE) {
 					
+					login.setVisibility(View.VISIBLE);
+					password.setVisibility(View.VISIBLE);
+					email.setVisibility(View.VISIBLE);
+					registerCommand.setVisibility(View.VISIBLE);
+					
+					login.setOnFocusChangeListener(this);
 					password.setOnFocusChangeListener(this);
-					password.setHint(R.string.password);
-					email.setHint(R.string.email);
 					email.setOnFocusChangeListener(this);
+					registerCommand.setOnClickListener(this);
 					
-					rl = (LinearLayout) findViewById(R.id.layout1);
-					
-					LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					
-					final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-					
-					int pixels = (int) (240 * scale + 0.5f);
-					int buttonPixels = (int) (200 * scale + 0.5f);
-					
-					password.setLayoutParams(params);
-					email.setLayoutParams(params);
-					email.setMaxWidth((int) (240 * scale + 0.5f));
-					
-					rl.addView(email);
-					rl.addView(password);
-					rl.addView(loginCommand);
-					
+					LOGIN_NOT_VISIBLE = false;
+				
 				}
 				else {
-					email = null;
-					password = null;
-					loginCommand = null;
 					
-					rl.removeView(email);
-					rl.removeView(password);
-					rl.removeView(loginCommand);
+					login.setVisibility(View.GONE);
+					password.setVisibility(View.GONE);
+					email.setVisibility(View.GONE);
+					registerCommand.setVisibility(View.GONE);
+					LOGIN_NOT_VISIBLE = true;
+					
 				}
 				break;
 			case R.id.button3:
@@ -204,25 +196,44 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			else if (v == password) {
 				password.setHint("");
 			}
-			
+			else if (v == email) {
+				email.setHint("");
+			}	
+		}
+		else {
+			if (v == login && ((EditText)v).getText().toString().equals("")) {
+				login.setHint(R.string.username);
+			}
+			else if (v == password && ((EditText)v).getText().toString().equals("")) {
+				password.setHint(R.string.password);
+			}
+			else if (v == email && ((EditText)v).getText().toString().equals("")) {
+				email.setHint(R.string.email);
+			}	
 		}
 	}
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count,
 			int after) {
-		// ASDSADASDASsadbbbb
-		
+
 	}
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 		Toast.makeText(getApplicationContext(), count+"", Toast.LENGTH_SHORT).show();
 		register.checkIfFree(s.toString());
+	}
+
+	public void updateCheckStatus(Boolean[] bool) {
+		if (bool[0] == true) {
+			login2.setBackgroundResource(R.drawable.green_ok);
+		}
+		else login2.setBackgroundResource(R.drawable.red_not_ok);
 	}
 }
