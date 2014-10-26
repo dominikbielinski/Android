@@ -23,12 +23,9 @@ public class DbConnection {
 		if (connection == null) 
 			try {
 				   Class.forName("com.mysql.jdbc.Driver");
-				   System.out.println("Connecting to database...");
 				   connection = DriverManager.getConnection("jdbc:mysql://192.168.1.2/cityalerts","dominik","dominik");
-				   System.out.println("success");
 			}
 			catch(Exception ex) {
-				   System.out.println("Error: unable to load driver class!");
 				   ex.printStackTrace();
 			}
 		return connection;

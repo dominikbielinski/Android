@@ -61,6 +61,7 @@ public final class R {
         public static final int emailExists=0x7f05000e;
         public static final int hello_world=0x7f050001;
         public static final int login=0x7f050007;
+        public static final int login2=0x7f050014;
         public static final int loginExists=0x7f05000f;
         public static final int loginFail=0x7f050012;
         public static final int loginSuccess=0x7f050011;

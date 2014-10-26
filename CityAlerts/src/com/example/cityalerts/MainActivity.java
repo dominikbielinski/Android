@@ -73,6 +73,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		email.setOnFocusChangeListener(this);
 		password.setOnFocusChangeListener(this);
 		password2.setOnFocusChangeListener(this);
+		
 		registerCommand.setOnClickListener(this);
 		loginCommand.setOnClickListener(this);
 		
@@ -184,7 +185,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				}
 				break;
 			case R.id.button3:
-				startActivity(new Intent(MainActivity.this, Alert.class));
+				Intent intent = new Intent(MainActivity.this, Alert.class);
+				intent.putExtra("login", loggedUser);
+				intent.putExtra("haslo", loggedPassword);
+				startActivity(intent);
 				break;
 			case R.id.registerCommand:
 				register.tryToRegister(login.getText().toString(),
@@ -212,7 +216,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				email.setHint("");
 			}
 			else if (v == login2) {
-				password.setHint("");
+				login2.setHint("");
 			}
 			else if (v == password2) {
 				password2.setHint("");
@@ -230,7 +234,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				email.setHint(R.string.email);
 				email.setCompoundDrawables(null, null, null, null);
 			}	
-			if (v == login2 && ((EditText)v).getText().toString().equals("")) {
+			else if (v == login2 && ((EditText)v).getText().toString().equals("")) {
 				login2.setHint(R.string.username);
 			}
 			else if (v == password2 && ((EditText)v).getText().toString().equals("")) {
@@ -313,6 +317,7 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 						login2.setVisibility(View.GONE);
 						password2.setVisibility(View.GONE);
 						loginCommand.setVisibility(View.GONE);
+						button1.setVisibility(View.GONE);
 					}
 				}
 			});

@@ -11,7 +11,7 @@
     <string name="login">Login</string>
     <string name="newAlert">Nowe zgłoszenie</string>
     <string name="email">E-mail</string>
-    <string name="doRegister">Zarejestruj!</string>
+    <string name="doRegister">Zarejestruj</string>
     <string name="title_activity_alert">Alert</string>
     <string name="registerSuccess">Zarejestrowano</string>
     <string name="registerFail">Rejestracja nie powiodła się</string>
@@ -20,6 +20,7 @@
     <string name="doLogin">Zaloguj!</string>
     <string name="loginSuccess">Zalogowano</string>
     <string name="loginFail">Podano złe dane</string>
-    <string name="logout">Wyloguj!</string>
+    <string name="logout">Wyloguj</string>
+    <string name="login2">Użytkownik</string>
     
 </resources>
