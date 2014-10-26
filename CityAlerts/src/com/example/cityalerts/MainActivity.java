@@ -1,12 +1,13 @@
 package com.example.cityalerts;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
-import android.opengl.Visibility;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -17,26 +18,23 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements View.OnClickListener, View.OnFocusChangeListener {
 	
-	Button button1, button2, button3, registerCommand;
-	EditText login, password, email;
+	Button button1, button2, button3, registerCommand, loginCommand;
+	EditText login, password, email, login2, password2;
 	ScrollView sv;
 	Register register;
-	LinearLayout ll , llmain;
-	Button loginCommand;
-	View login2;
 	Drawable drawable,drawable2,drawable3,drawable4;
 	ScaleDrawable sd,sd2,sd3,sd4;
 	
 	
 	private boolean LOGIN_NOT_VISIBLE = true;
 	private boolean REGISTER_NOT_VISIBLE = true;
+	private String loggedUser;
+	private String loggedPassword;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +43,12 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		
+		SharedPreferences sp = getPreferences(MODE_PRIVATE);
+		
+		if (sp.contains("email") && sp.contains("password")) {
+			setUser(sp.getString("email", null),sp.getString("password", null));
+		}
 		
 		setContentView(R.layout.activity_main);
 		
@@ -57,14 +61,20 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		button3.setOnClickListener(this);
 		
 		login = (EditText) findViewById(R.id.login);
+		login2 = (EditText) findViewById(R.id.login2);
 		password = (EditText) findViewById(R.id.password);
+		password2 = (EditText) findViewById(R.id.password2);
 		email = (EditText) findViewById(R.id.email);
 		registerCommand = (Button) findViewById(R.id.registerCommand);
-
+		loginCommand = (Button) findViewById(R.id.loginCommand);
+		
 		login.setOnFocusChangeListener(this);
+		login2.setOnFocusChangeListener(this);
 		email.setOnFocusChangeListener(this);
 		password.setOnFocusChangeListener(this);
+		password2.setOnFocusChangeListener(this);
 		registerCommand.setOnClickListener(this);
+		loginCommand.setOnClickListener(this);
 		
 		login.addTextChangedListener(new MultiTextWatcher(login));
 		email.addTextChangedListener(new MultiTextWatcher(email));
@@ -94,12 +104,17 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 		sd4 = new ScaleDrawable(drawable4, 0, 0, 0);
 		
 		button1.setCompoundDrawables(null, null, sd.getDrawable(), null); 
+		button2.setCompoundDrawables(null, null, sd.getDrawable(), null); 
 		
 //		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
 //
 //		StrictMode.setThreadPolicy(policy); 
 
 	
+	}
+
+	private void setUser(String string, String string2) {
+		
 	}
 
 	@Override
@@ -123,12 +138,6 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 
 	@Override
 	public void onClick(View v) {
-		
-		if (v == registerCommand) {
-//			new Register(login.getText().toString(), password.getText().toString(), email.getText().toString());
-			DbConnection instance = DbConnection.getInstance();
-			System.out.println("hahaha");
-		}	
 		
 		switch(v.getId()) {
 			case R.id.button1:
@@ -157,19 +166,19 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			case R.id.button2:
 				if (LOGIN_NOT_VISIBLE) {
 					
-					login.setVisibility(View.VISIBLE);
-					password.setVisibility(View.VISIBLE);
-					email.setVisibility(View.VISIBLE);
-					registerCommand.setVisibility(View.VISIBLE);
+					login2.setVisibility(View.VISIBLE);
+					password2.setVisibility(View.VISIBLE);
+					loginCommand.setVisibility(View.VISIBLE);
+					
+					button2.setCompoundDrawables(null, null, sd2.getDrawable(), null); 
 					
 					LOGIN_NOT_VISIBLE = false;
 				}
 				else {
 					
-					login.setVisibility(View.GONE);
-					password.setVisibility(View.GONE);
-					email.setVisibility(View.GONE);
-					registerCommand.setVisibility(View.GONE);
+					login2.setVisibility(View.GONE);
+					password2.setVisibility(View.GONE);
+					loginCommand.setVisibility(View.GONE);
 					LOGIN_NOT_VISIBLE = true;
 					
 				}
@@ -181,6 +190,10 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				register.tryToRegister(login.getText().toString(),
 										email.getText().toString(),
 										password.getText().toString());
+				break;
+			case R.id.loginCommand:
+				register.tryToLogin(login2.getText().toString(),
+									password2.getText().toString());
 		}
 		
 	}
@@ -197,7 +210,13 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			}
 			else if (v == email) {
 				email.setHint("");
-			}	
+			}
+			else if (v == login2) {
+				password.setHint("");
+			}
+			else if (v == password2) {
+				password2.setHint("");
+			}
 		}
 		else {
 			if (v == login && ((EditText)v).getText().toString().equals("")) {
@@ -211,6 +230,12 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 				email.setHint(R.string.email);
 				email.setCompoundDrawables(null, null, null, null);
 			}	
+			if (v == login2 && ((EditText)v).getText().toString().equals("")) {
+				login2.setHint(R.string.username);
+			}
+			else if (v == password2 && ((EditText)v).getText().toString().equals("")) {
+				password2.setHint(R.string.password);
+			}
 		}
 	}
 
@@ -258,5 +283,48 @@ public class MainActivity extends Activity implements View.OnClickListener, View
 			}
 			
 		}
+	}
+
+	public void confirmRegister(int string) {
+	
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setPositiveButton("OK", null);
+		AlertDialog dialog = builder.create();
+		
+		TextView title = new TextView(this);
+		title.setText(string);
+		title.setGravity(Gravity.CENTER);
+		title.setTextSize(20);
+		dialog.setCustomTitle(title);
+		
+		dialog.show();
+		
+	}
+
+	public void setLoggedUser(final Boolean bool, String login, String password) {
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if (bool) {
+						button2.setText(R.string.logout);
+						login2.setVisibility(View.GONE);
+						password2.setVisibility(View.GONE);
+						loginCommand.setVisibility(View.GONE);
+					}
+				}
+			});
+			
+			AlertDialog dialog = builder.create();
+			if (bool) {
+				dialog.setTitle(R.string.loginSuccess);
+				loggedUser = login;
+				loggedPassword = password;
+			}
+			else dialog.setTitle(R.string.loginFail);
+			
+			dialog.show();
 	}
 }

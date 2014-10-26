@@ -13,5 +13,13 @@
     <string name="email">E-mail</string>
     <string name="doRegister">Zarejestruj!</string>
     <string name="title_activity_alert">Alert</string>
-
+    <string name="registerSuccess">Zarejestrowano</string>
+    <string name="registerFail">Rejestracja nie powiodła się</string>
+    <string name="emailExists">Podany email jest zajęty</string>
+    <string name="loginExists">Podany login jest zajęty</string>
+    <string name="doLogin">Zaloguj!</string>
+    <string name="loginSuccess">Zalogowano</string>
+    <string name="loginFail">Podano złe dane</string>
+    <string name="logout">Wyloguj!</string>
+    
 </resources>

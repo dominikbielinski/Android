@@ -1,7 +1,6 @@
 package com.example.cityalerts;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -66,14 +65,32 @@ public class Register {
 		new RegisterCheck().execute(new String[]{login,email,password});
 	}
 	
-	private class RegisterCheck extends AsyncTask<String, String, Void> {
+	private class RegisterCheck extends AsyncTask<String, Integer, Void> {
 
 		@Override
 		protected Void doInBackground(String... params) {
 			
 			String sql = "INSERT INTO haslo (wartosc) VALUES (?)";
 			Connection connection = DbConnection.getConnection();
-
+			
+			ResultSet rs,rs2;
+			
+			try {	
+				rs = connection.createStatement().executeQuery("SELECT username FROM uzytkownik u where u.username='" + params[0] + "'");
+				rs2 = connection.createStatement().executeQuery("SELECT email FROM uzytkownik u where u.email='" + params[1] + "'");
+				
+				if (rs.next()){
+					publishProgress(R.string.loginExists);
+					return null;
+				}
+				else if (rs2.next()) {
+					publishProgress(R.string.emailExists);
+					return null;
+				}
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+			}
+			
 			try {
 				final MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 				messageDigest.reset();
@@ -96,7 +113,7 @@ public class Register {
 				int affectedRows = statement.executeUpdate();
 				
 				if (affectedRows != 0) {
-					ResultSet rs = statement.getGeneratedKeys();
+					rs = statement.getGeneratedKeys();
 					if (rs.next()) {
 						long generatedId = rs.getInt(1);
 						String sql2 = "INSERT INTO uzytkownik (username, idtyp, email, idHaslo) VALUES (?,?,?,?)";
@@ -105,17 +122,79 @@ public class Register {
 						statement2.setInt(2, 1);
 						statement2.setString(3, params[1]);
 						statement2.setLong(4, generatedId);
-						statement2.executeUpdate();
+						int rows = statement2.executeUpdate();
+						if (rows != 0) publishProgress(R.string.registerSuccess);
+						else publishProgress(R.string.registerFail);
 					}
 				}
 			}
-			catch (SQLException | NoSuchAlgorithmException ex) {ex.printStackTrace();}
+			catch (SQLException | NoSuchAlgorithmException ex) {
+				ex.printStackTrace();
+				publishProgress(R.string.registerFail);
+			}
 			return null;
 		}
 		
-		protected void onProgressUpdate(String...params) {
-			((MainActivity)activity).updateCheckStatus(params);
+		protected void onProgressUpdate(Integer...params) {
+				((MainActivity)activity).confirmRegister(params[0]);
 	     }
 	}
-	
+
+	public void tryToLogin(String login, String password) {
+		new Login().execute(new String[]{login, password});
+	}
+		
+	private class Login extends AsyncTask<String, Boolean, Void> {
+
+		String login;
+		String password;
+		
+		@Override
+		protected Void doInBackground(String... params) {
+			Connection connection = DbConnection.getConnection();
+			try {
+				String sql = "SELECT username, h.wartosc FROM "
+						+ "uzytkownik u inner join haslo h on h.idhaslo=u.idhaslo "
+						+ "where u.username=? " + "and h.wartosc=?";
+
+				PreparedStatement ps = connection.prepareStatement(sql);
+
+				final MessageDigest messageDigest = MessageDigest
+						.getInstance("MD5");
+				messageDigest.reset();
+				try {
+					messageDigest.update(params[1].getBytes("UTF8"));
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				final byte[] resultByte = messageDigest.digest();
+
+				StringBuffer sb = new StringBuffer();
+				for (int i = 0; i < resultByte.length; i++) {
+					sb.append(Integer.toString((resultByte[i] & 0xff) + 0x100,
+							16).substring(1));
+				}
+
+				ps.setString(1, params[0]);
+				ps.setString(2, sb.toString());
+
+				ResultSet rs = ps.executeQuery();
+				if (rs.next()) {
+					publishProgress(true);
+					login = params[0];
+					password = sb.toString();
+				} else
+					publishProgress(false);
+			}
+
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		protected void onProgressUpdate(Boolean... params) {
+			((MainActivity) activity).setLoggedUser(params[0], login, password);
+		}
+	}
 }
