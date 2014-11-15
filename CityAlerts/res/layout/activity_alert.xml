@@ -1,16 +1,111 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.cityalerts.Alert" >
 
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+    android:gravity="center"
+    android:orientation="vertical"
+    
+    >
+    
     <TextView
+        android:id="@+id/connectionState"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_height="wrap_content" />
+  
+<ScrollView 
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" 
+     android:gravity="center"
+    >
 
-</RelativeLayout>
+	<LinearLayout 
+   	 android:layout_width="match_parent"
+   	 android:layout_height="match_parent"
+   	 android:orientation="vertical"
+   	 android:gravity="center"
+   	 android:layout_gravity="center"
+     >
+		
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:gravity="center">
+	        
+	        <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/category" />
+
+	        <Spinner
+	            android:id="@+id/spinner"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content" />
+
+	    </LinearLayout>
+	    
+    	<LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:gravity="center">
+	    
+			<CheckBox
+			    android:id="@+id/checkbox"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content" 
+			    />
+			
+			 <TextView
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="@string/newCategory" />
+
+		</LinearLayout>
+		
+    	<EditText
+    	    android:id="@+id/newCategory"
+    	    android:layout_width="240dp"
+    	    android:layout_height="wrap_content"
+    	    android:hint="@string/category"
+    	    android:visibility="gone"
+    	     />
+    	
+    	<EditText
+    	    android:id="@+id/city"
+    	    android:layout_width="240dp"
+    	    android:layout_height="wrap_content"
+    	    android:gravity="center_horizontal"
+    	    android:hint="@string/city" />
+    	
+    	<EditText
+    	    android:id="@+id/street"
+    	    android:layout_width="240dp"
+    	    android:layout_height="wrap_content"
+    	    android:gravity="center_horizontal"
+    	    android:hint="@string/street" />
+    	
+    	<EditText
+    	    android:id="@+id/description"
+    	    android:layout_width="240dp"
+    	    android:layout_height="wrap_content"
+    	    android:gravity="center_horizontal"
+    	    android:hint="@string/description"
+    	    android:inputType="textMultiLine" />
+
+    	<ImageView
+    	    android:id="@+id/imageView1"
+  			android:layout_width="240dp"
+   			android:layout_height="240dp"
+			android:src="@drawable/gallery" />
+
+    	<Button
+    	    android:id="@+id/buttonTest"
+    	    android:gravity="center_horizontal"
+    	    android:layout_width="wrap_content"
+    	    android:layout_height="wrap_content" />
+
+	</LinearLayout>
+</ScrollView>
+</LinearLayout>

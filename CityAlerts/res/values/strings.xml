@@ -21,6 +21,18 @@
     <string name="loginSuccess">Zalogowano</string>
     <string name="loginFail">Podano złe dane</string>
     <string name="logout">Wyloguj</string>
+    <string name="logoutSuccess">Wylogowano</string>
     <string name="login2">Użytkownik</string>
+    <string name="category">Kategoria</string>
+    <string name="newCategory">Inna kategoria</string>
+    <string name="city">Miasto</string>
+    <string name="description">Opis</string>
+    <string name="street">Ulica</string>
+    <string name="userOrEmailExists">Podany użytkownik lub email jest już zajęty</string>
+    <string name="uploading">Wysyłanie&#8230;</string>
+    <string name="remember">Zapamiętaj</string>
+    <string name="logging">Logowanie&#8230;</string>
+    <string name="noConnection">Brak połączenia</string>
+    <string name="sent">Wysłano</string>
     
 </resources>
