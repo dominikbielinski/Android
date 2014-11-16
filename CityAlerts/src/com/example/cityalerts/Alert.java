@@ -3,32 +3,15 @@ package com.example.cityalerts;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.BasicHttpEntity;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -47,11 +30,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -68,8 +49,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -79,26 +60,17 @@ public class Alert extends Activity implements LocationListener {
 	LocationManager locationManager;
 	ImageView iv;
 	Button buttonTest;
-	
+	ProgressDialog dialog;
 	Bitmap bitmap;
-	
 	List<String> categories = new ArrayList<String>();
-	
+	List<Integer> categoryIds = new ArrayList<Integer>();
 	Spinner spinner;
-	
 	ArrayAdapter<String> dataAdapter;
-	
 	File photo;
-
-	Bitmap scaled;
-	
-	Uri imageUri;
-	
 	EditText newCategory;
-	
 	EditText city,street,description;
-	Bitmap bp;
 	CheckBox checkBox;
+	TextView categoryText;
 	
 	private TextView connectionState;
 	
@@ -114,6 +86,7 @@ public class Alert extends Activity implements LocationListener {
 
 		iv = (ImageView) findViewById(R.id.imageView1);
 		connectionState = (TextView) findViewById(R.id.connectionState);
+		categoryText = (TextView) findViewById(R.id.categoryText);
 
 		city = (EditText) findViewById(R.id.city);
 		street = (EditText) findViewById(R.id.street);
@@ -130,8 +103,13 @@ public class Alert extends Activity implements LocationListener {
 					boolean isChecked) {
 				if (isChecked) {
 					newCategory.setVisibility(View.VISIBLE);
+//					categoryText.setVisibility(View.GONE);
+//					spinner.setVisibility(View.GONE);
+					
 				} else {
 					newCategory.setVisibility(View.GONE);
+//					categoryText.setVisibility(View.VISIBLE);
+//					spinner.setVisibility(View.VISIBLE);
 				}
 			}
 		});
@@ -238,11 +216,9 @@ public class Alert extends Activity implements LocationListener {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		super.onActivityResult(requestCode, resultCode, data);
-
 		bitmap = getResizedBitmap(800, 600, photo.getAbsolutePath());
-
 		ExifInterface exif = null;
-
+		
 		try {
 			exif = new ExifInterface(photo.getAbsolutePath());
 		} catch (IOException e) {
@@ -302,30 +278,20 @@ public class Alert extends Activity implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location paramLocation) {
-		// Toast.makeText(getBaseContext(),
-		// Double.toString(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER).getLatitude()),
-		// Toast.LENGTH_LONG).show();
 	}
 
 	@Override
 	public void onProviderDisabled(String paramString) {
-		// startActivity(new
-		// Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
 	}
 
 	@Override
 	public void onProviderEnabled(String paramString) {
-		Toast.makeText(getBaseContext(), "Gps turned on ", Toast.LENGTH_LONG)
-				.show();
 	}
 
 	@Override
 	public void onStatusChanged(String paramString, int paramInt,
 			Bundle paramBundle) {
-
 	}
-	
-	ProgressDialog dialog;
 	
 	private void uploadAlert() {
 		RequestParams params = new RequestParams();
@@ -341,7 +307,16 @@ public class Alert extends Activity implements LocationListener {
 		String city = this.city.getText().toString();
 		String street = this.street.getText().toString();
 		String description = this.description.getText().toString();
-		String category = (String) this.spinner.getSelectedItem();
+		String category = null;
+		
+		if (checkBox.isChecked()) {
+			category = newCategory.getText().toString();
+			params.put("category", category);
+		}
+		else {
+			category = categoryIds.get(spinner.getSelectedItemPosition()).toString();
+			params.put("categoryid", category);
+		}
 		
 		if (location != null) {
 			params.put("latitude", location.getLatitude());
@@ -360,7 +335,7 @@ public class Alert extends Activity implements LocationListener {
 			params.put("category", category);
 		}
 
-		WebApiClient.getInstance().post("UploadFile",params, new AsyncHttpResponseHandler() {
+		WebApiClient.getInstance().post("UploadAlert",params, new AsyncHttpResponseHandler() {
 			
 			@Override
 		    public void onStart() {
@@ -400,21 +375,23 @@ public class Alert extends Activity implements LocationListener {
 	
 	private List<String> getCategories() {
 		
-		List<String> list = new ArrayList<String>();
-		WebApiClient.getInstance().post("Category", new JsonHttpResponseHandler() {
+		WebApiClient.getInstance().get("Category", new JsonHttpResponseHandler() {
 			
 			@Override
 			public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
-				int b = 7;
-				
-				for (int i = 0; i < response.length(); i++) {
-					try {
-						categories.add((String) response.get(i));
+
+				Gson gson = new Gson();
+				for(int i = 0; i < response.length(); i++){
+		            try {
+						JSONObject jsonObj = response.getJSONObject(i);
+						Category category = gson.fromJson(jsonObj.toString(), Category.class);
+						categories.add(category.name);
+						categoryIds.add(category.categoryID);
 					} catch (JSONException e) {
 						e.printStackTrace();
-					} 
+					}
 				}
-				
+
 				ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(Alert.this,
 						android.R.layout.simple_spinner_item, categories);
 					dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -423,7 +400,7 @@ public class Alert extends Activity implements LocationListener {
 			
 			@Override
 			public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-				int c = 8;
+				
 			}
 			
 			

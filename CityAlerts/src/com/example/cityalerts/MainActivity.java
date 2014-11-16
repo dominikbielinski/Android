@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	
 	ProgressDialog dialog;
 	
-	AsyncHttpClient client;
+	PersistentCookieStore cookieStore;
 
 	private boolean USER_IS_LOGGED;
 
@@ -97,9 +97,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		password2.setOnFocusChangeListener(this);
 		registerCommand.setOnClickListener(this);
 		loginCommand.setOnClickListener(this);
-		
-		client = new AsyncHttpClient();
-		
+
 		drawable = getResources().getDrawable(R.drawable.blue_arrow_down);
 		drawable.setBounds(0, 0, (int) (drawable.getIntrinsicWidth() * 0.1),
 				(int) (drawable.getIntrinsicHeight() * 0.1));
@@ -128,15 +126,14 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		if (sp.contains("username") && sp.contains("password")) {
 			tryToLogin(sp.getString("username", ""), sp.getString("password", ""));
 		}
+		cookieStore = new PersistentCookieStore(this);
+		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
 	}
 
 	private void tryToLogin(final String username, final String password) {
 		RequestParams rp = new RequestParams();
 		rp.add("username", username);
 		rp.add("password", password);
-		
-		PersistentCookieStore cookieStore = new PersistentCookieStore(this);
-		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
 		
 		WebApiClient.getInstance().post("UserLogin", rp, new AsyncHttpResponseHandler() {
 
@@ -173,6 +170,65 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		    	TextView title = new TextView(MainActivity.this);
 		    	if (statusCode == 403) {
 		    		title.setText(R.string.loginFail);
+		    	}
+		    	else title.setText(R.string.noConnection);
+		    		
+		    	title.setGravity(Gravity.CENTER);
+		    	title.setTextSize(20);
+		    	dialog.setCustomTitle(title);
+		    	dialog.show();
+		    }
+		});
+	}
+	
+	public void tryToRegister(final String username, final String email, final String password) {
+		RequestParams rp = new RequestParams();
+		rp.add("username", username);
+		rp.add("email", email);
+		rp.add("password", password);
+		
+		WebApiClient.getInstance().post("UserRegistration", rp, new AsyncHttpResponseHandler() {
+
+		    @Override
+		    public void onStart() {
+		    	dialog = new ProgressDialog(MainActivity.this);
+		        dialog.setMessage(getResources().getString(R.string.registrating));
+		        dialog.setIndeterminate(false);
+		        dialog.setCancelable(true);
+		        dialog.show();
+		    }
+
+		    @Override
+		    public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+		    	dialog.hide();
+		    	 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+			    	builder.setPositiveButton("OK", null);
+			    	AlertDialog dialog = builder.create();
+
+			    	TextView title = new TextView(MainActivity.this);
+			    	if (statusCode == 409) {
+			    		title.setText(R.string.userOrEmailExists);
+			    	}
+			    	else title.setText(R.string.noConnection);
+			    		
+			    	title.setGravity(Gravity.CENTER);
+			    	title.setTextSize(20);
+			    	dialog.setCustomTitle(title);
+			    	dialog.show();
+		    	tryToLogin(username, password);
+		    }
+
+		    @Override
+		    public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
+		        dialog.hide();
+		        
+		        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+		    	builder.setPositiveButton("OK", null);
+		    	AlertDialog dialog = builder.create();
+
+		    	TextView title = new TextView(MainActivity.this);
+		    	if (statusCode == 409) {
+		    		title.setText(R.string.userOrEmailExists);
 		    	}
 		    	else title.setText(R.string.noConnection);
 		    		
@@ -250,8 +306,9 @@ public class MainActivity extends Activity implements View.OnClickListener,
 				}
 			} else {
 				hideButtons(false);
-				WebApiClient.getInstance().getClient().setCookieStore(null);
+				cookieStore.clear();
 				USER_IS_LOGGED = false;
+				sp.edit().clear().commit();
 			}
 			break;
 		case R.id.button3:
@@ -260,7 +317,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			startActivity(intent);
 			break;
 		case R.id.registerCommand:
-			
+			tryToRegister(username.getText().toString(), email.getText().toString(), password.getText().toString());
 			break;
 		case R.id.loginCommand:
 			tryToLogin(username2.getText().toString(), password2.getText().toString());	

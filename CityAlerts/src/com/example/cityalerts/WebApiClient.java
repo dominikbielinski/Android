@@ -42,5 +42,9 @@ public class WebApiClient {
 	public void post(String url, JsonHttpResponseHandler responseHandler) {
 		client.post(getAbsoluteUrl(url), responseHandler);
 	}
+	
+	public void get(String url, JsonHttpResponseHandler responseHandler) {
+		client.get(getAbsoluteUrl(url), responseHandler);
+	}
 
 }

@@ -34,5 +34,7 @@
     <string name="logging">Logowanie&#8230;</string>
     <string name="noConnection">Brak połączenia</string>
     <string name="sent">Wysłano</string>
+    <string name="registrating">Rejestracja&#8230;</string>    
+    <string name="send">Wyślij</string>
     
 </resources>
