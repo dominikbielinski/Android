@@ -5,6 +5,7 @@ import org.apache.http.Header;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -22,7 +23,6 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
@@ -33,30 +33,20 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	Button button1, button2, button3, registerCommand, loginCommand;
 	CheckBox remember;
 	EditText username, password, email, username2, password2;
-	Drawable drawable, drawable2, drawable3, drawable4;
-	ScaleDrawable sd, sd2, sd3, sd4;
+	Drawable drawable3, drawable4;
+	ScaleDrawable sd3, sd4;
 	TextView rememberUser;
-	
+
 	SharedPreferences sp;
 
 	private boolean LOGIN_NOT_VISIBLE = true;
 	private boolean REGISTER_NOT_VISIBLE = true;
 
-	private String loggedUser;
-	
 	ProgressDialog dialog;
-	
+
 	PersistentCookieStore cookieStore;
 
 	private boolean USER_IS_LOGGED;
-
-	public String getLoggedUser() {
-		return loggedUser;
-	}
-
-	public void setLoggedUser(String loggedUser) {
-		this.loggedUser = loggedUser;
-	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +57,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.activity_main);
-		
+
 		sp = getPreferences(MODE_PRIVATE);
 
 		button1 = (Button) findViewById(R.id.button1);
@@ -75,7 +65,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		button3 = (Button) findViewById(R.id.button3);
 		registerCommand = (Button) findViewById(R.id.registerCommand);
 		loginCommand = (Button) findViewById(R.id.loginCommand);
-		
+
 		button1.setOnClickListener(this);
 		button2.setOnClickListener(this);
 		button3.setOnClickListener(this);
@@ -85,9 +75,9 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		password = (EditText) findViewById(R.id.password);
 		password2 = (EditText) findViewById(R.id.password2);
 		email = (EditText) findViewById(R.id.email);
-		
+
 		rememberUser = (TextView) findViewById(R.id.rememberUser);
-		
+
 		remember = (CheckBox) findViewById(R.id.remember);
 
 		username.setOnFocusChangeListener(this);
@@ -97,17 +87,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		password2.setOnFocusChangeListener(this);
 		registerCommand.setOnClickListener(this);
 		loginCommand.setOnClickListener(this);
-
-		drawable = getResources().getDrawable(R.drawable.blue_arrow_down);
-		drawable.setBounds(0, 0, (int) (drawable.getIntrinsicWidth() * 0.1),
-				(int) (drawable.getIntrinsicHeight() * 0.1));
-		sd = new ScaleDrawable(drawable, 0, 0, 0);
-
-		drawable2 = getResources().getDrawable(R.drawable.blue_arrow_up);
-		drawable2.setBounds(0, 0, (int) (drawable2.getIntrinsicWidth() * 0.1),
-				(int) (drawable2.getIntrinsicHeight() * 0.1));
-
-		sd2 = new ScaleDrawable(drawable2, 0, 0, 0);
 
 		drawable3 = getResources().getDrawable(R.drawable.green_ok);
 		drawable3.setBounds(0, 0, (int) (drawable3.getIntrinsicWidth() * 0.04),
@@ -120,11 +99,9 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 		sd4 = new ScaleDrawable(drawable4, 0, 0, 0);
 
-		button1.setCompoundDrawables(null, null, sd.getDrawable(), null);
-		button2.setCompoundDrawables(null, null, sd.getDrawable(), null);
-
 		if (sp.contains("username") && sp.contains("password")) {
-			tryToLogin(sp.getString("username", ""), sp.getString("password", ""));
+			tryToLogin(sp.getString("username", ""),
+					sp.getString("password", ""));
 		}
 		cookieStore = new PersistentCookieStore(this);
 		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
@@ -134,110 +111,123 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		RequestParams rp = new RequestParams();
 		rp.add("username", username);
 		rp.add("password", password);
-		
-		WebApiClient.getInstance().post("UserLogin", rp, new AsyncHttpResponseHandler() {
 
-		    @Override
-		    public void onStart() {
-		    	dialog = new ProgressDialog(MainActivity.this);
-		        dialog.setMessage(getResources().getString(R.string.logging));
-		        dialog.setIndeterminate(false);
-		        dialog.setCancelable(true);
-		        dialog.show();
-		    }
+		WebApiClient.getInstance().post("UserLogin", rp,
+				new AsyncHttpResponseHandler() {
 
-		    @Override
-		    public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-		    	if (remember.isChecked()) {
-		    		Editor editor = sp.edit();
-		    		editor.putString("username", username);
-		    		editor.putString("password", password);
-		    		editor.commit();
-		    	}
-		    	dialog.hide();
-		    	USER_IS_LOGGED = true;
-		    	hideButtons(true);
-		    }
+					@Override
+					public void onStart() {
+						dialog = new ProgressDialog(MainActivity.this);
+						dialog.setMessage(getResources().getString(
+								R.string.logging));
+						dialog.setIndeterminate(false);
+						dialog.setCancelable(true);
+						dialog.show();
+					}
 
-		    @Override
-		    public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-		        dialog.hide();
-		        
-		        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		    	builder.setPositiveButton("OK", null);
-		    	AlertDialog dialog = builder.create();
+					@Override
+					public void onSuccess(int statusCode, Header[] headers,
+							byte[] response) {
+						if (remember.isChecked()) {
+							Editor editor = sp.edit();
+							editor.putString("username", username);
+							editor.putString("password", password);
+							editor.commit();
+						}
+						dialog.hide();
+						USER_IS_LOGGED = true;
+						hideButtons(true);
+					}
 
-		    	TextView title = new TextView(MainActivity.this);
-		    	if (statusCode == 403) {
-		    		title.setText(R.string.loginFail);
-		    	}
-		    	else title.setText(R.string.noConnection);
-		    		
-		    	title.setGravity(Gravity.CENTER);
-		    	title.setTextSize(20);
-		    	dialog.setCustomTitle(title);
-		    	dialog.show();
-		    }
-		});
+					@Override
+					public void onFailure(int statusCode, Header[] headers,
+							byte[] errorResponse, Throwable e) {
+						dialog.hide();
+
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								MainActivity.this);
+						builder.setPositiveButton("OK", null);
+						AlertDialog dialog = builder.create();
+
+						TextView title = new TextView(MainActivity.this);
+						if (statusCode == 403) {
+							title.setText(R.string.loginFail);
+						} else
+							title.setText(R.string.noConnection);
+
+						title.setGravity(Gravity.CENTER);
+						title.setTextSize(20);
+						dialog.setCustomTitle(title);
+						dialog.show();
+					}
+				});
 	}
-	
-	public void tryToRegister(final String username, final String email, final String password) {
+
+	public void tryToRegister(final String username, final String email,
+			final String password) {
 		RequestParams rp = new RequestParams();
 		rp.add("username", username);
 		rp.add("email", email);
 		rp.add("password", password);
-		
-		WebApiClient.getInstance().post("UserRegistration", rp, new AsyncHttpResponseHandler() {
 
-		    @Override
-		    public void onStart() {
-		    	dialog = new ProgressDialog(MainActivity.this);
-		        dialog.setMessage(getResources().getString(R.string.registrating));
-		        dialog.setIndeterminate(false);
-		        dialog.setCancelable(true);
-		        dialog.show();
-		    }
+		WebApiClient.getInstance().post("UserRegistration", rp,
+				new AsyncHttpResponseHandler() {
 
-		    @Override
-		    public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-		    	dialog.hide();
-		    	 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-			    	builder.setPositiveButton("OK", null);
-			    	AlertDialog dialog = builder.create();
+					@Override
+					public void onStart() {
+						dialog = new ProgressDialog(MainActivity.this);
+						dialog.setMessage(getResources().getString(
+								R.string.registrating));
+						dialog.setIndeterminate(false);
+						dialog.setCancelable(true);
+						dialog.show();
+					}
 
-			    	TextView title = new TextView(MainActivity.this);
-			    	if (statusCode == 409) {
-			    		title.setText(R.string.userOrEmailExists);
-			    	}
-			    	else title.setText(R.string.noConnection);
-			    		
-			    	title.setGravity(Gravity.CENTER);
-			    	title.setTextSize(20);
-			    	dialog.setCustomTitle(title);
-			    	dialog.show();
-		    	tryToLogin(username, password);
-		    }
+					@Override
+					public void onSuccess(int statusCode, Header[] headers,
+							byte[] response) {
+						dialog.hide();
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								MainActivity.this);
+						builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+							
+							@Override
+							public void onClick(DialogInterface arg0, int arg1) {
+								tryToLogin(username, password);
+							}
+						});
+						AlertDialog dialog = builder.create();
 
-		    @Override
-		    public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-		        dialog.hide();
-		        
-		        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-		    	builder.setPositiveButton("OK", null);
-		    	AlertDialog dialog = builder.create();
+						TextView title = new TextView(MainActivity.this);
+						title.setText(R.string.registerSuccess);
+						title.setGravity(Gravity.CENTER);
+						title.setTextSize(20);
+						dialog.setCustomTitle(title);
+						dialog.show();
+					}
 
-		    	TextView title = new TextView(MainActivity.this);
-		    	if (statusCode == 409) {
-		    		title.setText(R.string.userOrEmailExists);
-		    	}
-		    	else title.setText(R.string.noConnection);
-		    		
-		    	title.setGravity(Gravity.CENTER);
-		    	title.setTextSize(20);
-		    	dialog.setCustomTitle(title);
-		    	dialog.show();
-		    }
-		});
+					@Override
+					public void onFailure(int statusCode, Header[] headers,
+							byte[] errorResponse, Throwable e) {
+						dialog.hide();
+
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								MainActivity.this);
+						builder.setPositiveButton("OK", null);
+						AlertDialog dialog = builder.create();
+
+						TextView title = new TextView(MainActivity.this);
+						if (statusCode == 409) {
+							title.setText(R.string.userOrEmailExists);
+						} else
+							title.setText(R.string.noConnection);
+
+						title.setGravity(Gravity.CENTER);
+						title.setTextSize(20);
+						dialog.setCustomTitle(title);
+						dialog.show();
+					}
+				});
 	}
 
 	@Override
@@ -259,27 +249,24 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	public void onClick(View v) {
 
 		switch (v.getId()) {
-		
+
 		case R.id.button1:
-			
+
 			if (REGISTER_NOT_VISIBLE) {
 				username.setVisibility(View.VISIBLE);
 				password.setVisibility(View.VISIBLE);
 				email.setVisibility(View.VISIBLE);
 				registerCommand.setVisibility(View.VISIBLE);
-				button1.setCompoundDrawables(null, null, sd2.getDrawable(),
-						null);
 				REGISTER_NOT_VISIBLE = false;
 			} else {
 				username.setVisibility(View.GONE);
 				password.setVisibility(View.GONE);
 				email.setVisibility(View.GONE);
 				registerCommand.setVisibility(View.GONE);
-				button1.setCompoundDrawables(null, null, sd.getDrawable(), null);
 				REGISTER_NOT_VISIBLE = true;
 			}
 			break;
-			
+
 		case R.id.button2:
 
 			if (!USER_IS_LOGGED) {
@@ -290,8 +277,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 					loginCommand.setVisibility(View.VISIBLE);
 					remember.setVisibility(View.VISIBLE);
 					rememberUser.setVisibility(View.VISIBLE);
-					button2.setCompoundDrawables(null, null, sd2.getDrawable(),
-							null);
 					LOGIN_NOT_VISIBLE = false;
 				} else {
 
@@ -300,8 +285,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 					loginCommand.setVisibility(View.GONE);
 					remember.setVisibility(View.GONE);
 					rememberUser.setVisibility(View.GONE);
-					button2.setCompoundDrawables(null, null, sd.getDrawable(),
-							null);
 					LOGIN_NOT_VISIBLE = true;
 				}
 			} else {
@@ -313,14 +296,15 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			break;
 		case R.id.button3:
 			Intent intent = new Intent(MainActivity.this, Alert.class);
-			intent.putExtra("login", loggedUser);
 			startActivity(intent);
 			break;
 		case R.id.registerCommand:
-			tryToRegister(username.getText().toString(), email.getText().toString(), password.getText().toString());
+			tryToRegister(username.getText().toString(), email.getText()
+					.toString(), password.getText().toString());
 			break;
 		case R.id.loginCommand:
-			tryToLogin(username2.getText().toString(), password2.getText().toString());	
+			tryToLogin(username2.getText().toString(), password2.getText()
+					.toString());
 		}
 	}
 
@@ -373,67 +357,49 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	private void checkEmail(String email) {
 		RequestParams params = new RequestParams();
 		params.put("email", email);
-		WebApiClient.getInstance().post("UserEmailCheck", params, new AsyncHttpResponseHandler() {
-			
-			 @Override
-			    public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-			    	updateEmailStatus(true);
-			    }
+		WebApiClient.getInstance().post("UserEmailCheck", params,
+				new AsyncHttpResponseHandler() {
 
-			    @Override
-			    public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-			        if (statusCode == 409) {
-			        	updateEmailStatus(false);
-			        }
-			    }
-		});
+					@Override
+					public void onSuccess(int statusCode, Header[] headers,
+							byte[] response) {
+						updateEmailStatus(true);
+					}
+
+					@Override
+					public void onFailure(int statusCode, Header[] headers,
+							byte[] errorResponse, Throwable e) {
+						if (statusCode == 409) {
+							updateEmailStatus(false);
+						}
+					}
+				});
 	}
 
 	private void checkUsername(String username) {
 		RequestParams params = new RequestParams();
 		params.put("username", username);
-		WebApiClient.getInstance().post("UserLoginCheck", params, new AsyncHttpResponseHandler() {
-			
-			 @Override
-			    public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-			    	updateUsernameStatus(true);
-			    }
+		WebApiClient.getInstance().post("UserLoginCheck", params,
+				new AsyncHttpResponseHandler() {
 
-			    @Override
-			    public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-			        if (statusCode == 409) {
-			        	updateUsernameStatus(false);
-			        }
-			    }
-		});
-	}
+					@Override
+					public void onSuccess(int statusCode, Header[] headers,
+							byte[] response) {
+						updateUsernameStatus(true);
+					}
 
-	public void confirmRegistration(boolean bool) {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setPositiveButton("OK", null);
-		AlertDialog dialog = builder.create();
-
-		TextView title = new TextView(this);
-
-		if (bool) {
-			title.setText(R.string.registerSuccess);
-			hideButtons(true);
-		} else {
-			title.setText(R.string.userOrEmailExists);
-		}
-		title.setGravity(Gravity.CENTER);
-		title.setTextSize(20);
-		dialog.setCustomTitle(title);
-
-		dialog.show();
-
+					@Override
+					public void onFailure(int statusCode, Header[] headers,
+							byte[] errorResponse, Throwable e) {
+						if (statusCode == 409) {
+							updateUsernameStatus(false);
+						}
+					}
+				});
 	}
 
 	private void hideButtons(boolean bool) {
 		if (bool) {
-			button1.setCompoundDrawables(null, null, sd.getDrawable(), null);
-			
 			button1.setVisibility(View.GONE);
 			username.setVisibility(View.GONE);
 			username2.setVisibility(View.GONE);
@@ -444,7 +410,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			registerCommand.setVisibility(View.GONE);
 			remember.setVisibility(View.GONE);
 			rememberUser.setVisibility(View.GONE);
-			
+
 			button2.setText(R.string.logout);
 			button2.setCompoundDrawables(null, null, null, null);
 			LOGIN_NOT_VISIBLE = true;
@@ -452,7 +418,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		} else {
 			button1.setVisibility(View.VISIBLE);
 			button2.setText(R.string.login);
-			button2.setCompoundDrawables(null, null, sd.getDrawable(), null);
 		}
 	}
 
@@ -471,10 +436,10 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			email.setCompoundDrawables(null, null, sd4.getDrawable(), null);
 		}
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
-//		dialog.dismiss();
+		// dialog.dismiss();
 	}
 }
