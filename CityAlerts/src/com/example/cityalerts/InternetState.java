@@ -16,12 +16,10 @@ public class InternetState extends BroadcastReceiver {
 			
 	        NetworkInfo ni=(NetworkInfo) intent.getExtras().get(ConnectivityManager.EXTRA_NETWORK_INFO);
 	        if(ni!=null && ni.getState()==NetworkInfo.State.CONNECTED) {
-	            Toast.makeText(context, "OK", Toast.LENGTH_SHORT).show();
 	        }
 	     }
 		
 	     if(intent.getExtras().getBoolean(ConnectivityManager.EXTRA_NO_CONNECTIVITY,Boolean.FALSE)) {
-	    	 Toast.makeText(context, "BRAK", Toast.LENGTH_SHORT).show();
 	     }
 
 	}

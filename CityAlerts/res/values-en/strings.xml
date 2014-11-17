@@ -2,29 +2,42 @@
 <resources>
 
     <string name="app_name">CityAlerts</string>
+    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_send_alert">SendAlert</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="register">Registration</string>
-    <string name="login">Login</string>
+    <string name="register">Sign up</string>
+    <string name="login">Log in</string>
     <string name="newAlert">New alert</string>
     <string name="email">E-mail</string>
-    <string name="doRegister">Sign in</string>
+    <string name="doRegister">Sign up now!</string>
     <string name="title_activity_alert">Alert</string>
-    <string name="registerSuccess">Registration completed</string>
+    <string name="registerSuccess">Registration complete</string>
     <string name="registerFail">Registration failed</string>
-    <string name="emailExists">E-mail already taken</string>
-    <string name="loginExists">Username already taken</string>
-    <string name="doLogin">Log in</string>
-    <string name="loginSuccess">Log-in successful </string>
-    <string name="loginFail">Wrong e-mail or password</string>
+    <string name="emailExists">E-mail already in use</string>
+    <string name="loginExists">Username already in use</string>
+    <string name="doLogin">Log in now!</string>
+    <string name="loginSuccess">Log in successful</string>
+    <string name="loginFail">Wrong username or password</string>
     <string name="logout">Log out</string>
+    <string name="logoutSuccess">Log out successful</string>
     <string name="login2">Username</string>
     <string name="category">Category</string>
     <string name="newCategory">New category</string>
     <string name="city">City</string>
     <string name="description">Description</string>
     <string name="street">Street</string>
+    <string name="userOrEmailExists">Username or e-mail already in use</string>
+    <string name="uploading">Uploading&#8230;</string>
+    <string name="remember">Remember me</string>
+    <string name="logging">Logging in&#8230;</string>
+    <string name="noConnection">No connection</string>
+    <string name="sent">Sent successfully</string>
+    <string name="registrating">Signing up&#8230;</string>    
+    <string name="send">Send</string>
+    <string name="polish">Polski</string>
+    <string name="english">English</string>
+    <string name="internet">Internet:</string>
     
 </resources>

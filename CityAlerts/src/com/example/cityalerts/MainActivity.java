@@ -1,34 +1,47 @@
 package com.example.cityalerts;
 
+import java.util.Locale;
+
 import org.apache.http.Header;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
 
 public class MainActivity extends Activity implements View.OnClickListener,
-		View.OnFocusChangeListener {
+		View.OnFocusChangeListener, TextWatcher {
 
 	Button button1, button2, button3, registerCommand, loginCommand;
 	CheckBox remember;
@@ -36,9 +49,15 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	Drawable drawable3, drawable4;
 	ScaleDrawable sd3, sd4;
 	TextView rememberUser;
+	Spinner language;
+	String[] strings = {"Polski", "English"};
+	int[] images = {R.drawable.polish , R.drawable.english};
+	int currentSelection = 0;
 
 	SharedPreferences sp;
-
+	
+	boolean firstTime;
+	
 	private boolean LOGIN_NOT_VISIBLE = true;
 	private boolean REGISTER_NOT_VISIBLE = true;
 
@@ -75,11 +94,65 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		password = (EditText) findViewById(R.id.password);
 		password2 = (EditText) findViewById(R.id.password2);
 		email = (EditText) findViewById(R.id.email);
+		
+		username.addTextChangedListener(this);
+		email.addTextChangedListener(this);
+		password.addTextChangedListener(this);
 
 		rememberUser = (TextView) findViewById(R.id.rememberUser);
 
 		remember = (CheckBox) findViewById(R.id.remember);
+		
+		firstTime = true;
+		language = (Spinner)findViewById(R.id.language);
+		  CustomAdapter adapter = new CustomAdapter(this,
+		    R.layout.row,  strings);
+		language.setAdapter(adapter);
+		
+		if (Locale.getDefault().getLanguage().equals("en")) {
+			language.setSelection(1);
+		}
 
+		final OnItemSelectedListener listener = new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> paramAdapterView,
+					View paramView, int paramInt, long paramLong) {
+				if (paramInt == 1) {
+					String language = "en";
+					Locale locale = new Locale(language);
+					Locale.setDefault(locale);
+					Configuration config = new Configuration();
+					config.locale = locale;
+					getBaseContext().getResources().updateConfiguration(
+							config, null);
+					MainActivity.this.recreate();
+				}
+				if (paramInt == 0) {
+					String language = "pl";
+					Locale locale = new Locale(language);
+					Locale.setDefault(locale);
+					Configuration config = new Configuration();
+					config.locale = locale;
+					getBaseContext().getResources().updateConfiguration(
+							config, null);
+					MainActivity.this.recreate();
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				
+			}
+		};
+		
+		language.post(new Runnable() {
+			@Override
+			public void run() {
+				language.setOnItemSelectedListener(listener);
+			}
+		});
+		
 		username.setOnFocusChangeListener(this);
 		username2.setOnFocusChangeListener(this);
 		email.setOnFocusChangeListener(this);
@@ -87,6 +160,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		password2.setOnFocusChangeListener(this);
 		registerCommand.setOnClickListener(this);
 		loginCommand.setOnClickListener(this);
+		registerCommand.setEnabled(false);
 
 		drawable3 = getResources().getDrawable(R.drawable.green_ok);
 		drawable3.setBounds(0, 0, (int) (drawable3.getIntrinsicWidth() * 0.04),
@@ -106,6 +180,38 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		cookieStore = new PersistentCookieStore(this);
 		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
 	}
+
+	private class CustomAdapter extends ArrayAdapter<String> {
+
+		public CustomAdapter(Context context, int textViewResourceId,   String[] objects) {
+            super(context, textViewResourceId, objects);
+        }
+ 
+        @Override
+        public View getDropDownView(int position, View convertView,ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+ 
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getCustomView(position, convertView, parent);
+        }
+ 
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+ 
+            LayoutInflater inflater = getLayoutInflater();
+            View row = inflater.inflate(R.layout.row, parent, false);
+            TextView label=(TextView) row.findViewById(R.id.languageText);
+            label.setText(strings[position]);
+ 
+            TextView sub=(TextView)row.findViewById(R.id.languageText);
+            sub.setText(strings[position]);
+ 
+            ImageView icon=(ImageView)row.findViewById(R.id.languageFlag);
+            icon.setImageResource(images[position]);
+            return row;
+            }
+        }
 
 	private void tryToLogin(final String username, final String password) {
 		RequestParams rp = new RequestParams();
@@ -440,6 +546,29 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	@Override
 	public void onPause() {
 		super.onPause();
-		// dialog.dismiss();
+		if (dialog != null) {
+			dialog.dismiss();
+		}
+	}
+
+	@Override
+	public void afterTextChanged(Editable arg0) {
+		if (!username.getText().toString().equals("") && !email.getText().toString().equals("") && !password.getText().toString().equals("")) {
+			registerCommand.setEnabled(true);
+		}
+		else {
+			registerCommand.setEnabled(false);
+		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+			int arg3) {
+		
+	}
+
+	@Override
+	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+		
 	}
 }

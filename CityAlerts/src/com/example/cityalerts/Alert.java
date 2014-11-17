@@ -71,9 +71,7 @@ public class Alert extends Activity implements LocationListener {
 	EditText city,street,description;
 	CheckBox checkBox;
 	TextView categoryText;
-	
-	private TextView connectionState;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -85,7 +83,6 @@ public class Alert extends Activity implements LocationListener {
 		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
 		iv = (ImageView) findViewById(R.id.imageView1);
-		connectionState = (TextView) findViewById(R.id.connectionState);
 		categoryText = (TextView) findViewById(R.id.categoryText);
 
 		city = (EditText) findViewById(R.id.city);
@@ -103,18 +100,11 @@ public class Alert extends Activity implements LocationListener {
 					boolean isChecked) {
 				if (isChecked) {
 					newCategory.setVisibility(View.VISIBLE);
-//					categoryText.setVisibility(View.GONE);
-//					spinner.setVisibility(View.GONE);
-					
 				} else {
 					newCategory.setVisibility(View.GONE);
-//					categoryText.setVisibility(View.VISIBLE);
-//					spinner.setVisibility(View.VISIBLE);
 				}
 			}
 		});
-
-		connectionState.setText("asdshadasdl");
 
 		fillGPSInputs();
 
@@ -202,14 +192,6 @@ public class Alert extends Activity implements LocationListener {
 			}
 		}
 		return location;
-	}
-
-	public TextView getConnectionState() {
-		return connectionState;
-	}
-
-	public void setConnectionState(TextView connectionState) {
-		this.connectionState = connectionState;
 	}
 
 	@Override
@@ -412,6 +394,9 @@ public class Alert extends Activity implements LocationListener {
 	public void onPause() {
 		super.onPause();
 		locationManager.removeUpdates(this);
+		if (dialog != null) {
+			dialog.dismiss();
+		}
 	}
 	
 }

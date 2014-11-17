@@ -36,5 +36,8 @@
     <string name="sent">Wysłano</string>
     <string name="registrating">Rejestracja&#8230;</string>    
     <string name="send">Wyślij</string>
+    <string name="polish">Polski</string>
+    <string name="english">English</string>
+    <string name="internet">Internet:</string>
     
 </resources>
