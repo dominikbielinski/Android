@@ -30,39 +30,45 @@ public final class R {
         public static final int ic_launcher=0x7f020005;
         public static final int polish=0x7f020006;
         public static final int red_not_ok=0x7f020007;
+        public static final int roundcategory=0x7f020008;
+        public static final int roundcity=0x7f020009;
+        public static final int rounddescription=0x7f02000a;
+        public static final int roundsend=0x7f02000b;
+        public static final int roundspinner=0x7f02000c;
+        public static final int roundstreet=0x7f02000d;
     }
     public static final class id {
-        public static final int action_settings=0x7f080018;
-        public static final int button1=0x7f08000a;
-        public static final int button2=0x7f08000f;
-        public static final int button3=0x7f080015;
-        public static final int buttonTest=0x7f080008;
-        public static final int categoryText=0x7f080000;
-        public static final int checkbox=0x7f080002;
-        public static final int city=0x7f080004;
-        public static final int description=0x7f080006;
-        public static final int email=0x7f08000c;
-        public static final int imageView1=0x7f080007;
-        public static final int language=0x7f080009;
-        public static final int languageFlag=0x7f080016;
-        public static final int languageText=0x7f080017;
-        public static final int login=0x7f08000b;
-        public static final int login2=0x7f080010;
-        public static final int loginCommand=0x7f080014;
-        public static final int newCategory=0x7f080003;
-        public static final int password=0x7f08000d;
-        public static final int password2=0x7f080011;
-        public static final int registerCommand=0x7f08000e;
-        public static final int remember=0x7f080012;
-        public static final int rememberUser=0x7f080013;
-        public static final int spinner=0x7f080001;
-        public static final int street=0x7f080005;
+        public static final int action_settings=0x7f080017;
+        public static final int button1=0x7f080009;
+        public static final int button2=0x7f08000e;
+        public static final int button3=0x7f080014;
+        public static final int buttonTest=0x7f080007;
+        public static final int checkbox=0x7f080004;
+        public static final int city=0x7f080000;
+        public static final int description=0x7f080002;
+        public static final int email=0x7f08000b;
+        public static final int imageView1=0x7f080006;
+        public static final int language=0x7f080008;
+        public static final int languageFlag=0x7f080015;
+        public static final int languageText=0x7f080016;
+        public static final int login=0x7f08000a;
+        public static final int login2=0x7f08000f;
+        public static final int loginCommand=0x7f080013;
+        public static final int newCategory=0x7f080005;
+        public static final int password=0x7f08000c;
+        public static final int password2=0x7f080010;
+        public static final int registerCommand=0x7f08000d;
+        public static final int remember=0x7f080011;
+        public static final int rememberUser=0x7f080012;
+        public static final int spinner=0x7f080003;
+        public static final int street=0x7f080001;
     }
     public static final class layout {
         public static final int activity_alert=0x7f030000;
         public static final int activity_main=0x7f030001;
         public static final int activity_send_alert=0x7f030002;
         public static final int row=0x7f030003;
+        public static final int spinner_item=0x7f030004;
     }
     public static final class menu {
         public static final int alert=0x7f070000;

@@ -24,7 +24,7 @@
     <string name="logoutSuccess">Wylogowano</string>
     <string name="login2">Użytkownik</string>
     <string name="category">Kategoria</string>
-    <string name="newCategory">Inna kategoria</string>
+    <string name="newCategory">Nowa kategoria</string>
     <string name="city">Miasto</string>
     <string name="description">Opis</string>
     <string name="street">Ulica</string>

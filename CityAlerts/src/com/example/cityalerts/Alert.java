@@ -16,7 +16,6 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,8 +25,6 @@ import android.graphics.Matrix;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
@@ -55,9 +52,8 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-public class Alert extends Activity implements LocationListener {
+public class Alert extends Activity  {
 
-	LocationManager locationManager;
 	ImageView iv;
 	Button buttonTest;
 	ProgressDialog dialog;
@@ -70,7 +66,8 @@ public class Alert extends Activity implements LocationListener {
 	EditText newCategory;
 	EditText city,street,description;
 	CheckBox checkBox;
-	TextView categoryText;
+	Button categoryText;
+	private MyApplication application;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,11 +76,9 @@ public class Alert extends Activity implements LocationListener {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_alert);
-
-		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
+		application = (MyApplication) getApplication();
+		
 		iv = (ImageView) findViewById(R.id.imageView1);
-		categoryText = (TextView) findViewById(R.id.categoryText);
 
 		city = (EditText) findViewById(R.id.city);
 		street = (EditText) findViewById(R.id.street);
@@ -138,21 +133,18 @@ public class Alert extends Activity implements LocationListener {
 
 	private void fillGPSInputs() {
 
-		Location location = getLocation();
+		Location location = application.getLocation();
 
 		if (location != null) {
 
 			double latitude = location.getLatitude();
 			double longitude = location.getLongitude();
 			Geocoder gcd = new Geocoder(getBaseContext(), Locale.getDefault());
-
 			List<Address> addresses = null;
 
 			try {
 				addresses = gcd.getFromLocation(latitude, longitude, 1);
 				if (addresses.size() > 0) {
-					System.out.println(addresses.get(0).getLocality());
-
 					city.setText(addresses.get(0).getLocality());
 					street.setText(addresses.get(0).getAddressLine(0));
 
@@ -161,37 +153,6 @@ public class Alert extends Activity implements LocationListener {
 				e.printStackTrace();
 			}
 		}
-	}
-
-	public Location getLocation() {
-
-		Location location = null;
-
-		if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-
-			locationManager.requestLocationUpdates(
-					LocationManager.NETWORK_PROVIDER, 0, 0, this);
-
-			location = locationManager
-					.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-			if (location != null) {
-				return location;
-			}
-		}
-
-		else if (locationManager
-				.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-
-			locationManager.requestLocationUpdates(
-					LocationManager.GPS_PROVIDER, 0, 0, this);
-
-			location = locationManager
-					.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-			if (location != null) {
-				return location;
-			}
-		}
-		return location;
 	}
 
 	@Override
@@ -257,23 +218,6 @@ public class Alert extends Activity implements LocationListener {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	@Override
-	public void onLocationChanged(Location paramLocation) {
-	}
-
-	@Override
-	public void onProviderDisabled(String paramString) {
-	}
-
-	@Override
-	public void onProviderEnabled(String paramString) {
-	}
-
-	@Override
-	public void onStatusChanged(String paramString, int paramInt,
-			Bundle paramBundle) {
-	}
 	
 	private void uploadAlert() {
 		RequestParams params = new RequestParams();
@@ -285,7 +229,7 @@ public class Alert extends Activity implements LocationListener {
 			params.put("image", new ByteArrayInputStream(bitmapdata), "picture.png");
 		}
 		
-		Location location = getLocation();
+		Location location = application.getLocation();
 		String city = this.city.getText().toString();
 		String street = this.street.getText().toString();
 		String description = this.description.getText().toString();
@@ -375,8 +319,8 @@ public class Alert extends Activity implements LocationListener {
 				}
 
 				ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(Alert.this,
-						android.R.layout.simple_spinner_item, categories);
-					dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+						R.layout.spinner_item, categories);
+				//	dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 					spinner.setAdapter(dataAdapter);
 			}
 			
@@ -393,7 +337,6 @@ public class Alert extends Activity implements LocationListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		locationManager.removeUpdates(this);
 		if (dialog != null) {
 			dialog.dismiss();
 		}

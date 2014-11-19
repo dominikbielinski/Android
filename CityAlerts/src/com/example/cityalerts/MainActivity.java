@@ -571,4 +571,10 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 		
 	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		((MyApplication)getApplication()).locationManager.removeUpdates(((MyApplication)getApplication()));
+	}
 }
