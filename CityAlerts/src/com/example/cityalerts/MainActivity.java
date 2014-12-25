@@ -4,7 +4,6 @@ import java.util.Locale;
 
 import org.apache.http.Header;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,7 +14,9 @@ import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ScaleDrawable;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
@@ -27,6 +28,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -34,25 +36,32 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemSelectedListener;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
 
-public class MainActivity extends Activity implements View.OnClickListener,
-		View.OnFocusChangeListener, TextWatcher {
+public class MainActivity extends FragmentActivity implements View.OnClickListener,
+		View.OnFocusChangeListener, TextWatcher, GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener, LocationListener {
 
 	Button button1, button2, button3, registerCommand, loginCommand;
 	CheckBox remember;
 	EditText username, password, email, username2, password2;
 	Drawable drawable3, drawable4;
 	ScaleDrawable sd3, sd4;
-	TextView rememberUser;
 	Spinner language;
 	String[] strings = {"Polski", "English"};
 	int[] images = {R.drawable.polish , R.drawable.english};
 	int currentSelection = 0;
+	LocationRequest lr;
+	
+	private MainFragment mainFragment;
 
 	SharedPreferences sp;
 	
@@ -62,21 +71,47 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	private boolean REGISTER_NOT_VISIBLE = true;
 
 	ProgressDialog dialog;
-
+	
+	LocationClient lc;
+	
 	PersistentCookieStore cookieStore;
 
-	private boolean USER_IS_LOGGED;
+	public boolean USER_IS_LOGGED;
+	
+	private Location location;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if (savedInstanceState == null) {
+			
+	        mainFragment = new MainFragment();
+	        getSupportFragmentManager()
+	        .beginTransaction()
+	        .add(R.id.buttonFragment, mainFragment)
+	        .commit();
+	        
+	    } else {
+	    	
+	        mainFragment = (MainFragment) getSupportFragmentManager()
+	        .findFragmentById(android.R.id.content);
+	        
+	    }
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.activity_main);
 
+		lc = new LocationClient(this, this, this);
+		lr = LocationRequest.create();
+		lr.setInterval(1000);
+		lr.setFastestInterval(500);
+		lr.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		
+		
 		sp = getPreferences(MODE_PRIVATE);
 
 		button1 = (Button) findViewById(R.id.button1);
@@ -98,8 +133,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 		username.addTextChangedListener(this);
 		email.addTextChangedListener(this);
 		password.addTextChangedListener(this);
-
-		rememberUser = (TextView) findViewById(R.id.rememberUser);
 
 		remember = (CheckBox) findViewById(R.id.remember);
 		
@@ -173,10 +206,13 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
 		sd4 = new ScaleDrawable(drawable4, 0, 0, 0);
 
-		if (sp.contains("username") && sp.contains("password")) {
+		if (sp.contains("name") && sp.getString("password", null) != null) {
 			tryToLogin(sp.getString("username", ""),
 					sp.getString("password", ""));
 		}
+		
+		getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
+		
 		cookieStore = new PersistentCookieStore(this);
 		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
 	}
@@ -204,14 +240,23 @@ public class MainActivity extends Activity implements View.OnClickListener,
             TextView label=(TextView) row.findViewById(R.id.languageText);
             label.setText(strings[position]);
  
-            TextView sub=(TextView)row.findViewById(R.id.languageText);
-            sub.setText(strings[position]);
- 
             ImageView icon=(ImageView)row.findViewById(R.id.languageFlag);
             icon.setImageResource(images[position]);
             return row;
             }
         }
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+        lc.connect();
+	}
+	
+	@Override
+	protected void onStop() {
+        lc.disconnect();
+        super.onStop();
+	}
 
 	private void tryToLogin(final String username, final String password) {
 		RequestParams rp = new RequestParams();
@@ -235,14 +280,11 @@ public class MainActivity extends Activity implements View.OnClickListener,
 					public void onSuccess(int statusCode, Header[] headers,
 							byte[] response) {
 						if (remember.isChecked()) {
-							Editor editor = sp.edit();
-							editor.putString("username", username);
-							editor.putString("password", password);
-							editor.commit();
+							setLoginInfo(username, password, null, false);
 						}
 						dialog.hide();
 						USER_IS_LOGGED = true;
-						hideButtons(true);
+						hideButtons(true, false);
 					}
 
 					@Override
@@ -382,7 +424,6 @@ public class MainActivity extends Activity implements View.OnClickListener,
 					password2.setVisibility(View.VISIBLE);
 					loginCommand.setVisibility(View.VISIBLE);
 					remember.setVisibility(View.VISIBLE);
-					rememberUser.setVisibility(View.VISIBLE);
 					LOGIN_NOT_VISIBLE = false;
 				} else {
 
@@ -390,11 +431,10 @@ public class MainActivity extends Activity implements View.OnClickListener,
 					password2.setVisibility(View.GONE);
 					loginCommand.setVisibility(View.GONE);
 					remember.setVisibility(View.GONE);
-					rememberUser.setVisibility(View.GONE);
 					LOGIN_NOT_VISIBLE = true;
 				}
 			} else {
-				hideButtons(false);
+				hideButtons(false, false);
 				cookieStore.clear();
 				USER_IS_LOGGED = false;
 				sp.edit().clear().commit();
@@ -402,6 +442,10 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			break;
 		case R.id.button3:
 			Intent intent = new Intent(MainActivity.this, Alert.class);
+			if (location != null) {
+				intent.putExtra("lat", location.getLatitude());
+				intent.putExtra("lon", location.getLongitude());
+			}
 			startActivity(intent);
 			break;
 		case R.id.registerCommand:
@@ -504,8 +548,8 @@ public class MainActivity extends Activity implements View.OnClickListener,
 				});
 	}
 
-	private void hideButtons(boolean bool) {
-		if (bool) {
+	public void hideButtons(boolean hide, boolean isFacebook) {
+		if (hide) {
 			button1.setVisibility(View.GONE);
 			username.setVisibility(View.GONE);
 			username2.setVisibility(View.GONE);
@@ -515,15 +559,24 @@ public class MainActivity extends Activity implements View.OnClickListener,
 			loginCommand.setVisibility(View.GONE);
 			registerCommand.setVisibility(View.GONE);
 			remember.setVisibility(View.GONE);
-			rememberUser.setVisibility(View.GONE);
 
 			button2.setText(R.string.logout);
 			button2.setCompoundDrawables(null, null, null, null);
 			LOGIN_NOT_VISIBLE = true;
 			REGISTER_NOT_VISIBLE = true;
+			if (isFacebook) {
+				button2.setVisibility(View.GONE);
+				getSupportFragmentManager().beginTransaction().show(mainFragment).commit();
+			}
+			else {
+				button2.setVisibility(View.VISIBLE);
+				getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
+			}
 		} else {
 			button1.setVisibility(View.VISIBLE);
 			button2.setText(R.string.login);
+			button2.setVisibility(View.VISIBLE);
+			getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
 		}
 	}
 
@@ -571,10 +624,33 @@ public class MainActivity extends Activity implements View.OnClickListener,
 	public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
 		
 	}
-	
+
 	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		((MyApplication)getApplication()).locationManager.removeUpdates(((MyApplication)getApplication()));
+	public void onConnectionFailed(ConnectionResult arg0) {
+		
+	}
+
+	@Override
+	public void onConnected(Bundle arg0) {
+		lc.requestLocationUpdates(lr, this);
+	}
+
+	@Override
+	public void onDisconnected() {
+		
+	}
+
+	@Override
+	public void onLocationChanged(Location arg0) {
+		location = arg0;
+	}
+
+	public void setLoginInfo(String name, String password, String link, Boolean isFacebook) {
+			Editor editor = sp.edit();
+			editor.putString("name", name);
+			editor.putString("link", link);
+			editor.putString("password", password);
+			editor.putBoolean("facebook", isFacebook);
+			editor.commit();
 	}
 }

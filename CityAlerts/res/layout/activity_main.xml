@@ -14,7 +14,7 @@
 		android:gravity="right"
 		android:layout_gravity="right"
          />
-  
+
 <ScrollView 
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" 
@@ -87,6 +87,13 @@
         android:background="#802F8DD5"
         />
     
+    <fragment android:name="com.example.cityalerts.MainFragment"
+              android:id="@+id/buttonFragment"
+              android:layout_weight="1"
+              android:layout_width="wrap_content"
+              android:visibility="gone"
+              android:layout_height="0dp" />
+    
     <EditText
 	    android:id="@+id/login2"
 	    android:layout_width="240dp"
@@ -103,34 +110,16 @@
 	    android:gravity="center"
 	    android:hint="@string/password" 
 	    android:inputType="textPassword"/>
-    
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        >
-        
+           
         <CheckBox
             android:id="@+id/remember"
            	android:visibility="gone"
            	android:layout_width="wrap_content"
            	android:layout_height="wrap_content"
            	android:gravity="center"
+           	android:hint="@string/remember"
             />
         
-        <TextView 
-            android:id="@+id/rememberUser"
-            android:visibility="gone"
-            android:text="@string/remember"
-            android:layout_width="wrap_content"
-           	android:layout_height="wrap_content"
-            android:gravity="center"
-            />
-        
-        
-    </LinearLayout>
-    
     <Button
         android:id="@+id/loginCommand"
         android:layout_width="200dp"

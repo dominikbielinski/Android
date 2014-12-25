@@ -47,8 +47,9 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.facebook.UiLifecycleHelper;
+import com.facebook.widget.FacebookDialog;
 import com.google.gson.Gson;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
@@ -67,16 +68,21 @@ public class Alert extends Activity  {
 	EditText city,street,description;
 	CheckBox checkBox;
 	Button categoryText;
-	private MyApplication application;
+	Location location;
+	private UiLifecycleHelper uiHelper;
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		uiHelper = new UiLifecycleHelper(this, null);
+	    uiHelper.onCreate(savedInstanceState);
+	    
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		setContentView(R.layout.activity_alert);
-		application = (MyApplication) getApplication();
 		
 		iv = (ImageView) findViewById(R.id.imageView1);
 
@@ -100,6 +106,10 @@ public class Alert extends Activity  {
 				}
 			}
 		});
+		
+		location = new Location("");
+		location.setLatitude(getIntent().getExtras().getDouble("lat"));
+		location.setLongitude(getIntent().getExtras().getDouble("lon"));
 
 		fillGPSInputs();
 
@@ -132,9 +142,7 @@ public class Alert extends Activity  {
 	}
 
 	private void fillGPSInputs() {
-
-		Location location = application.getLocation();
-
+		
 		if (location != null) {
 
 			double latitude = location.getLatitude();
@@ -159,6 +167,19 @@ public class Alert extends Activity  {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
 		super.onActivityResult(requestCode, resultCode, data);
+		
+		uiHelper.onActivityResult(requestCode, resultCode, data, new FacebookDialog.Callback() {
+	        @Override
+	        public void onError(FacebookDialog.PendingCall pendingCall, Exception error, Bundle data) {
+	            System.out.println("blad");
+	        }
+
+	        @Override
+	        public void onComplete(FacebookDialog.PendingCall pendingCall, Bundle data) {
+	            System.out.println("brawo");
+	        }
+	    });
+		
 		bitmap = getResizedBitmap(800, 600, photo.getAbsolutePath());
 		ExifInterface exif = null;
 		
@@ -229,19 +250,20 @@ public class Alert extends Activity  {
 			params.put("image", new ByteArrayInputStream(bitmapdata), "picture.png");
 		}
 		
-		Location location = application.getLocation();
 		String city = this.city.getText().toString();
 		String street = this.street.getText().toString();
 		String description = this.description.getText().toString();
 		String category = null;
 		
-		if (checkBox.isChecked()) {
-			category = newCategory.getText().toString();
-			params.put("category", category);
-		}
-		else {
-			category = categoryIds.get(spinner.getSelectedItemPosition()).toString();
-			params.put("categoryid", category);
+		if (!categoryIds.isEmpty()) {
+			if (checkBox.isChecked()) {
+				category = newCategory.getText().toString();
+				params.put("category", category);
+			}
+			else {
+				category = categoryIds.get(spinner.getSelectedItemPosition()).toString();
+				params.put("categoryid", category);
+			}
 		}
 		
 		if (location != null) {
@@ -261,8 +283,7 @@ public class Alert extends Activity  {
 			params.put("category", category);
 		}
 
-		WebApiClient.getInstance().post("UploadAlert",params, new AsyncHttpResponseHandler() {
-			
+		WebApiClient.getInstance().post("UploadAlert",params, new JsonHttpResponseHandler() {
 			@Override
 		    public void onStart() {
 		    	dialog = new ProgressDialog(Alert.this);
@@ -273,16 +294,38 @@ public class Alert extends Activity  {
 		    }
 			
 			@Override
-			public void onSuccess(int arg0, Header[] arg1, byte[] arg2) {
+			public void onSuccess(int arg0, Header[] arg1, final JSONObject response) {
 				
 				dialog.hide();
 		        AlertDialog.Builder builder = new AlertDialog.Builder(Alert.this);
-		    	builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+		    	builder.setNegativeButton("OK", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						Alert.this.finish();
 					}
 				});
+		    	builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
+					
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						FacebookDialog shareDialog = null;
+						try {
+							String alertPath = "http://" + WebApiClient.BASE_IP + "/Home/ShowAlerts&id=" + response.getInt("alertID");
+							String imagePath = "http://" + WebApiClient.BASE_IP + response.getString("imagePath").substring(1);
+							String alertDescription = response.getString("description");
+							shareDialog = new FacebookDialog.ShareDialogBuilder(Alert.this)
+							.setLink(alertPath)
+							.setPicture(imagePath)
+							.setDescription(alertDescription)
+							.build();
+							uiHelper.trackPendingDialogCall(shareDialog.present());
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				});
+		    	
 		    	AlertDialog dialog = builder.create();
 		    	TextView title = new TextView(Alert.this);
 		    	title.setText(R.string.sent);	
@@ -293,9 +336,24 @@ public class Alert extends Activity  {
 			}
 			
 			@Override
-			public void onFailure(int arg0, Header[] arg1, byte[] arg2, Throwable arg3) {
+			public void onFailure(int statusCode, org.apache.http.Header[] headers, java.lang.Throwable throwable, org.json.JSONObject errorResponse) {
 				dialog.hide();
+
+				AlertDialog.Builder builder = new AlertDialog.Builder(
+						Alert.this);
+				builder.setPositiveButton("OK", null);
+				AlertDialog dialog = builder.create();
+
+				TextView title = new TextView(Alert.this);
+				
+				title.setText(R.string.noConnection);
+
+				title.setGravity(Gravity.CENTER);
+				title.setTextSize(20);
+				dialog.setCustomTitle(title);
+				dialog.show();
 			}
+			
 		});
 	}
 	
@@ -340,6 +398,25 @@ public class Alert extends Activity  {
 		if (dialog != null) {
 			dialog.dismiss();
 		}
+		uiHelper.onPause();
+	}
+	
+	@Override
+	protected void onResume() {
+	    super.onResume();
+	    uiHelper.onResume();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+	    uiHelper.onSaveInstanceState(outState);
+	}
+
+	@Override
+	public void onDestroy() {
+	    super.onDestroy();
+	    uiHelper.onDestroy();
 	}
 	
 }
