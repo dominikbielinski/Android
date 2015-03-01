@@ -18,6 +18,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
@@ -66,9 +67,10 @@ public class Alert extends Activity  {
 	File photo;
 	EditText newCategory;
 	EditText city,street,description;
-	CheckBox checkBox;
+	CheckBox checkBox,checkBox2;
 	Button categoryText;
 	Location location;
+	SharedPreferences sp;
 	private UiLifecycleHelper uiHelper;
 	
 
@@ -91,6 +93,10 @@ public class Alert extends Activity  {
 		description = (EditText) findViewById(R.id.description);
 		
 		checkBox = (CheckBox) findViewById(R.id.checkbox);
+		
+		checkBox2 = (CheckBox) findViewById(R.id.checkbox2);
+		
+		sp = getSharedPreferences("data",MODE_PRIVATE);
 
 		newCategory = (EditText) findViewById(R.id.newCategory);
 
@@ -107,10 +113,11 @@ public class Alert extends Activity  {
 			}
 		});
 		
-		location = new Location("");
-		location.setLatitude(getIntent().getExtras().getDouble("lat"));
-		location.setLongitude(getIntent().getExtras().getDouble("lon"));
-
+		if (getIntent().getExtras() != null) {
+			location = new Location("");
+			location.setLatitude(getIntent().getExtras().getDouble("lat"));	
+			location.setLongitude(getIntent().getExtras().getDouble("lon"));
+		}
 		fillGPSInputs();
 
 		iv.setOnClickListener(new OnClickListener() {
@@ -282,6 +289,18 @@ public class Alert extends Activity  {
 		if (category != null) {
 			params.put("category", category);
 		}
+		if (checkBox2.isChecked()) {
+			params.put("hidden", "true");
+		}
+		else {
+			params.put("hidden", "false");
+		}
+		if (sp.getBoolean("facebook", false)) {
+			params.put("facebook", true);
+			params.put("link", sp.getString("link", "Error"));
+			params.put("name", sp.getString("name", "Error"));
+		}
+		
 
 		WebApiClient.getInstance().post("UploadAlert",params, new JsonHttpResponseHandler() {
 			@Override
@@ -310,7 +329,7 @@ public class Alert extends Activity  {
 					public void onClick(DialogInterface dialog, int which) {
 						FacebookDialog shareDialog = null;
 						try {
-							String alertPath = "http://" + WebApiClient.BASE_IP + "/Home/ShowAlerts&id=" + response.getInt("alertID");
+							String alertPath = "http://" + WebApiClient.BASE_IP + "/Home/ShowAlert?id=" + response.getInt("alertID");
 							String imagePath = "http://" + WebApiClient.BASE_IP + response.getString("imagePath").substring(1);
 							String alertDescription = response.getString("description");
 							shareDialog = new FacebookDialog.ShareDialogBuilder(Alert.this)
@@ -320,7 +339,6 @@ public class Alert extends Activity  {
 							.build();
 							uiHelper.trackPendingDialogCall(shareDialog.present());
 						} catch (JSONException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}

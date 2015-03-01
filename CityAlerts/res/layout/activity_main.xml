@@ -87,12 +87,23 @@
         android:background="#802F8DD5"
         />
     
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:id="@+id/fl"
+        >
+    
     <fragment android:name="com.example.cityalerts.MainFragment"
               android:id="@+id/buttonFragment"
-              android:layout_weight="1"
+              android:layout_height="wrap_content"
               android:layout_width="wrap_content"
-              android:visibility="gone"
-              android:layout_height="0dp" />
+              android:gravity="center"
+              android:layout_gravity="center"
+		 />
+    
+    </FrameLayout>
     
     <EditText
 	    android:id="@+id/login2"

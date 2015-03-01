@@ -33,6 +33,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -55,6 +56,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	EditText username, password, email, username2, password2;
 	Drawable drawable3, drawable4;
 	ScaleDrawable sd3, sd4;
+	FrameLayout fl;
 	Spinner language;
 	String[] strings = {"Polski", "English"};
 	int[] images = {R.drawable.polish , R.drawable.english};
@@ -64,8 +66,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	private MainFragment mainFragment;
 
 	SharedPreferences sp;
-	
-	boolean firstTime;
 	
 	private boolean LOGIN_NOT_VISIBLE = true;
 	private boolean REGISTER_NOT_VISIBLE = true;
@@ -96,6 +96,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	    	
 	        mainFragment = (MainFragment) getSupportFragmentManager()
 	        .findFragmentById(android.R.id.content);
+	        hideButtons(true, true);
 	        
 	    }
 		
@@ -112,7 +113,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		lr.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		
 		
-		sp = getPreferences(MODE_PRIVATE);
+		sp = getSharedPreferences("data",MODE_PRIVATE);
 
 		button1 = (Button) findViewById(R.id.button1);
 		button2 = (Button) findViewById(R.id.button2);
@@ -136,7 +137,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 		remember = (CheckBox) findViewById(R.id.remember);
 		
-		firstTime = true;
 		language = (Spinner)findViewById(R.id.language);
 		  CustomAdapter adapter = new CustomAdapter(this,
 		    R.layout.row,  strings);
@@ -207,14 +207,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		sd4 = new ScaleDrawable(drawable4, 0, 0, 0);
 
 		if (sp.contains("name") && sp.getString("password", null) != null) {
-			tryToLogin(sp.getString("username", ""),
+			tryToLogin(sp.getString("name", ""),
 					sp.getString("password", ""));
 		}
 		
-		getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
+		//getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
 		
 		cookieStore = new PersistentCookieStore(this);
 		WebApiClient.getInstance().getClient().setCookieStore(cookieStore);
+		
+		fl = (FrameLayout) findViewById(R.id.fl);
+		fl.setVisibility(View.GONE);
+		if (savedInstanceState != null) {
+			hideButtons(true, true);
+		}
 	}
 
 	private class CustomAdapter extends ArrayAdapter<String> {
@@ -424,6 +430,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 					password2.setVisibility(View.VISIBLE);
 					loginCommand.setVisibility(View.VISIBLE);
 					remember.setVisibility(View.VISIBLE);
+					fl.setVisibility(View.VISIBLE);
 					LOGIN_NOT_VISIBLE = false;
 				} else {
 
@@ -431,6 +438,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 					password2.setVisibility(View.GONE);
 					loginCommand.setVisibility(View.GONE);
 					remember.setVisibility(View.GONE);
+					fl.setVisibility(View.GONE);
 					LOGIN_NOT_VISIBLE = true;
 				}
 			} else {
@@ -566,17 +574,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			REGISTER_NOT_VISIBLE = true;
 			if (isFacebook) {
 				button2.setVisibility(View.GONE);
-				getSupportFragmentManager().beginTransaction().show(mainFragment).commit();
+				fl.setVisibility(View.VISIBLE);
+				//getSupportFragmentManager().beginTransaction().show(mainFragment).commit();
 			}
 			else {
 				button2.setVisibility(View.VISIBLE);
-				getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
+				fl.setVisibility(View.GONE);
+				//getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
 			}
 		} else {
 			button1.setVisibility(View.VISIBLE);
 			button2.setText(R.string.login);
 			button2.setVisibility(View.VISIBLE);
-			getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
+			fl.setVisibility(View.GONE);
+			//getSupportFragmentManager().beginTransaction().hide(mainFragment).commit();
 		}
 	}
 
@@ -603,6 +614,11 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 			dialog.dismiss();
 		}
 	}
+	
+	@Override
+	protected void onDestroy() {
+		System.exit(0);
+	};
 
 	@Override
 	public void afterTextChanged(Editable arg0) {

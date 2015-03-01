@@ -41,5 +41,6 @@
     <string name="internet">Internet:</string>
     <string name="facebook_app_id">743690302394221</string>
     <string name="title_activity_main_fragment">MainFragment</string>
+    <string name="hideAlert">Ukryj zgłoszenie</string>
 
 </resources>

@@ -41,6 +41,8 @@ public class MainFragment extends Fragment {
 
 	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
 	    if (state.isOpened()) {
+	    	((MainActivity)getActivity()).hideButtons(true, true);
+	        ((MainActivity)getActivity()).USER_IS_LOGGED = true;
 	        Request.newMeRequest(session, new Request.GraphUserCallback() {
                 @Override
                 public void onCompleted(GraphUser user, Response response) {
@@ -48,9 +50,7 @@ public class MainFragment extends Fragment {
                     
                     String name = user.getName();
                     String link = user.getLink();
-                    
-        	        ((MainActivity)getActivity()).hideButtons(true, true);
-        	        ((MainActivity)getActivity()).USER_IS_LOGGED = true;        
+                         
         	        ((MainActivity)getActivity()).setLoginInfo(name,null, link, true);  
                 }
             }).executeAsync();
