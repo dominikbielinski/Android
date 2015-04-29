@@ -187,28 +187,30 @@ public class Alert extends Activity  {
 	        }
 	    });
 		
-		bitmap = getResizedBitmap(800, 600, photo.getAbsolutePath());
-		ExifInterface exif = null;
-		
-		try {
-			exif = new ExifInterface(photo.getAbsolutePath());
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (photo != null) {
+			bitmap = getResizedBitmap(800, 600, photo.getAbsolutePath());
+			ExifInterface exif = null;
+			
+			try {
+				exif = new ExifInterface(photo.getAbsolutePath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	
+			int orientation = exif
+					.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+	
+			if (orientation == 6) {
+				Matrix matrix = new Matrix();
+				matrix.postRotate(90);
+				bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
+						bitmap.getHeight(), matrix, true);
+				bitmap = Bitmap.createScaledBitmap(bitmap, 600, 800, true);
+			} else {
+				bitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, true);
+			}
+			iv.setImageBitmap(bitmap);
 		}
-
-		int orientation = exif
-				.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-
-		if (orientation == 6) {
-			Matrix matrix = new Matrix();
-			matrix.postRotate(90);
-			bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(),
-					bitmap.getHeight(), matrix, true);
-			bitmap = Bitmap.createScaledBitmap(bitmap, 600, 800, true);
-		} else {
-			bitmap = Bitmap.createScaledBitmap(bitmap, 800, 600, true);
-		}
-		iv.setImageBitmap(bitmap);
 	}
 
 	public Bitmap getResizedBitmap(int targetWidth, int targetHeight,
@@ -332,11 +334,20 @@ public class Alert extends Activity  {
 							String alertPath = "http://" + WebApiClient.BASE_IP + "/Home/ShowAlert?id=" + response.getInt("alertID");
 							String imagePath = "http://" + WebApiClient.BASE_IP + response.getString("imagePath").substring(1);
 							String alertDescription = response.getString("description");
-							shareDialog = new FacebookDialog.ShareDialogBuilder(Alert.this)
-							.setLink(alertPath)
-							.setPicture(imagePath)
-							.setDescription(alertDescription)
-							.build();
+							
+							if (!response.getString("imagePath").equals("null")) {
+								shareDialog = new FacebookDialog.ShareDialogBuilder(Alert.this)
+								.setLink(alertPath)
+								.setDescription(alertDescription)
+								.setPicture(imagePath)
+								.build();
+							}
+							else {
+								shareDialog = new FacebookDialog.ShareDialogBuilder(Alert.this)
+								.setLink(alertPath)
+								.setDescription(alertDescription)
+								.build();
+							}
 							uiHelper.trackPendingDialogCall(shareDialog.present());
 						} catch (JSONException e) {
 							e.printStackTrace();

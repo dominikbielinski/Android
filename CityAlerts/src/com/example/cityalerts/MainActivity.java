@@ -96,7 +96,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	    	
 	        mainFragment = (MainFragment) getSupportFragmentManager()
 	        .findFragmentById(android.R.id.content);
-	        hideButtons(true, true);
+	        
+	      //  hideButtons(true, true);
 	        
 	    }
 		
@@ -136,55 +137,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 		password.addTextChangedListener(this);
 
 		remember = (CheckBox) findViewById(R.id.remember);
-		
-		language = (Spinner)findViewById(R.id.language);
-		  CustomAdapter adapter = new CustomAdapter(this,
-		    R.layout.row,  strings);
-		language.setAdapter(adapter);
-		
-		if (Locale.getDefault().getLanguage().equals("en")) {
-			language.setSelection(1);
-		}
-
-		final OnItemSelectedListener listener = new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> paramAdapterView,
-					View paramView, int paramInt, long paramLong) {
-				if (paramInt == 1) {
-					String language = "en";
-					Locale locale = new Locale(language);
-					Locale.setDefault(locale);
-					Configuration config = new Configuration();
-					config.locale = locale;
-					getBaseContext().getResources().updateConfiguration(
-							config, null);
-					MainActivity.this.recreate();
-				}
-				if (paramInt == 0) {
-					String language = "pl";
-					Locale locale = new Locale(language);
-					Locale.setDefault(locale);
-					Configuration config = new Configuration();
-					config.locale = locale;
-					getBaseContext().getResources().updateConfiguration(
-							config, null);
-					MainActivity.this.recreate();
-				}
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				
-			}
-		};
-		
-		language.post(new Runnable() {
-			@Override
-			public void run() {
-				language.setOnItemSelectedListener(listener);
-			}
-		});
 		
 		username.setOnFocusChangeListener(this);
 		username2.setOnFocusChangeListener(this);
@@ -557,6 +509,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 	}
 
 	public void hideButtons(boolean hide, boolean isFacebook) {
+		
 		if (hide) {
 			button1.setVisibility(View.GONE);
 			username.setVisibility(View.GONE);
